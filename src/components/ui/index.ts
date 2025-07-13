@@ -6,3 +6,4 @@ export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, 
 export { Badge, badgeVariants } from './badge';
 export { Checkbox, checkboxVariants } from './checkbox';
 export { Toast, useToast } from './toast';
+export { MarkdownRenderer } from './markdown-renderer';

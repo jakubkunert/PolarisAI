@@ -51,18 +51,64 @@ async function initializeAgent(providerId?: string, apiKey?: string) {
 
     const config = modelManager.getDefaultModelConfig();
     generalAgent = new GeneralAssistantAgent(provider, config);
-
-    // Initialize the agent
     await generalAgent.initialize();
   }
 
   return generalAgent;
 }
 
+// Helper function to create streaming response
+async function* streamAgentResponse(
+  agent: GeneralAssistantAgent,
+  userInput: UserInput
+): AsyncIterable<string> {
+    try {
+    // Get the streaming response from the agent
+    const stream = await agent.streamUserInput(userInput);
+
+    // Track the full response for metadata
+    let fullResponse = '';
+
+    // Yield the initial message metadata
+    yield JSON.stringify({
+      type: 'start',
+      id: `response_${Date.now()}`,
+      agentId: agent.id,
+      timestamp: new Date().toISOString()
+    }) + '\n';
+
+    // Stream the content
+    for await (const chunk of stream) {
+      fullResponse += chunk;
+      yield JSON.stringify({
+        type: 'content',
+        content: chunk
+      }) + '\n';
+    }
+
+    // Yield the final metadata
+    yield JSON.stringify({
+      type: 'end',
+      fullContent: fullResponse,
+      confidence: 0.9, // Default confidence for streaming
+      metadata: {
+        streaming: true,
+        timestamp: new Date().toISOString()
+      }
+    }) + '\n';
+
+  } catch (error) {
+    yield JSON.stringify({
+      type: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }) + '\n';
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, provider, apiKey } = body;
+    const { message, provider, apiKey, stream = false } = body;
 
     if (!message) {
       return NextResponse.json(
@@ -83,7 +129,36 @@ export async function POST(request: NextRequest) {
       metadata: {}
     };
 
-    // Process the input
+    // Handle streaming response
+    if (stream) {
+      const encoder = new TextEncoder();
+      const readable = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of streamAgentResponse(agent, userInput)) {
+              controller.enqueue(encoder.encode(chunk));
+            }
+            controller.close();
+          } catch (error) {
+            controller.enqueue(encoder.encode(JSON.stringify({
+              type: 'error',
+              error: error instanceof Error ? error.message : 'Unknown error'
+            }) + '\n'));
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(readable, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // Handle regular response
     const response = await agent.processInput(userInput);
 
     // Return the response
@@ -119,28 +194,39 @@ export async function POST(request: NextRequest) {
 
 export async function GET(_request: NextRequest) {
   try {
-    // Get provider status
-    const status = await modelManager.getProvidersStatus();
-    const availableProviders = modelManager.getAvailableProviders();
+    // Get available providers without requiring authentication
+    const availableProviders = modelManager.getAvailableProviders().map(p => ({
+      id: p.id,
+      name: p.name,
+      type: p.type,
+      status: p.getStatus()
+    }));
+
+    // Try to get agent status if possible, but don't fail if it's not available
+    let agentStatus = null;
+    try {
+      if (generalAgent) {
+        const status = generalAgent.getStatus();
+        agentStatus = {
+          id: status.id,
+          name: status.name,
+          initialized: status.initialized,
+          capabilities: status.capabilities,
+          memoryCount: status.memoryCount
+        };
+      }
+    } catch (agentError) {
+      // Agent not available, that's okay for status endpoint
+      console.log('Agent not available for status check:', agentError);
+    }
 
     return NextResponse.json({
       success: true,
-      providers: availableProviders.map(p => ({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        status: status[p.id]
-      })),
-      agent: generalAgent ? {
-        id: generalAgent.id,
-        name: generalAgent.name,
-        status: generalAgent.getStatus()
-      } : null
+      providers: availableProviders,
+      agent: agentStatus
     });
-
   } catch (error) {
-    console.error('Chat API status error:', error);
-
+    console.error('Status API error:', error);
     return NextResponse.json(
       {
         error: 'Failed to get status',

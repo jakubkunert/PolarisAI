@@ -284,4 +284,10 @@ I'm your General Assistant, part of the Polaris AI system. Here's what I can hel
 Just ask me anything, and I'll do my best to help! I'm designed to be thoughtful, accurate, and genuinely useful.
 `;
   }
+
+  async streamUserInput(input: UserInput): Promise<AsyncIterable<string>> {
+    // Create a simple prompt for streaming
+    const prompt = `User: ${input.content}`;
+    return this.streamResponse(prompt);
+  }
 }

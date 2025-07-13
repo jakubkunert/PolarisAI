@@ -187,7 +187,16 @@ If the plan requires approval, ask the user for confirmation before proceeding.
           stepsExecuted: plan.steps.length,
           estimatedDuration: plan.estimatedDuration
         },
-        reasoning: `Analyzed intent, created ${plan.steps.length} step plan, executed with ${Math.round(confidence * 100)}% confidence`
+        reasoning: `🔍 Analysis: Processed user request and identified optimal response strategy.
+
+📋 Planning: Created ${plan.steps.length} step execution plan:
+${plan.steps.map((step, i) => `  ${i + 1}. ${step.action}`).join('\n')}
+
+⏱️ Estimation: Expected completion time of ${plan.estimatedDuration} minute(s).
+
+⚡ Execution: Successfully processed request using available tools and knowledge.
+
+🎯 Confidence: ${Math.round(confidence * 100)}% based on plan clarity and execution success.`
       };
     } catch (error) {
       console.error('Error executing plan:', error);
@@ -201,7 +210,11 @@ If the plan requires approval, ask the user for confirmation before proceeding.
         type: 'text',
         confidence: 0.2,
         metadata: { error: true, planId: plan.id },
-        reasoning: 'Error occurred during plan execution, providing fallback response'
+        reasoning: `❌ Error: An issue occurred during plan execution.
+
+🔄 Fallback: Attempting to provide alternative assistance.
+
+📝 Note: This response uses basic capabilities due to the execution error.`
       };
     }
   }

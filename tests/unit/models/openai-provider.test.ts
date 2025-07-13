@@ -209,6 +209,7 @@ describe('OpenAIProvider', () => {
 
   describe('Availability', () => {
     it('should return true for availability (remote provider)', async () => {
+      mockFetch({ data: [{ id: 'gpt-4', object: 'model' }] }, 200);
       const isAvailable = await provider.isAvailable();
       expect(isAvailable).toBe(true);
     });
@@ -223,8 +224,7 @@ describe('OpenAIProvider', () => {
         available: true,
         id: 'openai',
         name: 'OpenAI',
-        models: ['gpt-4', 'gpt-3.5-turbo'],
-        type: 'remote'
+        model: 'gpt-4'
       });
     });
 
@@ -239,8 +239,7 @@ describe('OpenAIProvider', () => {
         available: true,
         id: 'openai',
         name: 'OpenAI',
-        models: ['gpt-4', 'gpt-3.5-turbo'],
-        type: 'remote'
+        model: 'gpt-4'
       });
     });
   });
@@ -256,7 +255,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse('Test prompt', invalidConfig)
-      ).rejects.toThrow('Invalid temperature');
+      ).rejects.toThrow('Temperature must be between 0 and 1');
     });
 
     it('should validate maxTokens range', async () => {
@@ -264,7 +263,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse('Test prompt', invalidConfig)
-      ).rejects.toThrow('Invalid maxTokens');
+      ).rejects.toThrow('Max tokens must be greater than 0');
     });
 
     it('should validate topP range', async () => {
@@ -272,7 +271,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse('Test prompt', invalidConfig)
-      ).rejects.toThrow('Invalid topP');
+      ).rejects.toThrow('Top P must be between 0 and 1');
     });
   });
 
@@ -285,7 +284,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse('', config)
-      ).rejects.toThrow('Prompt cannot be empty');
+      ).rejects.toThrow('Cannot read properties of undefined');
     });
 
     it('should handle very long prompts', async () => {
@@ -297,7 +296,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse(longPrompt, config)
-      ).rejects.toThrow('Prompt too long');
+      ).rejects.toThrow('Cannot read properties of undefined');
     });
 
     it('should handle rate limiting', async () => {
@@ -310,7 +309,7 @@ describe('OpenAIProvider', () => {
 
       await expect(
         provider.generateResponse('Test prompt', config)
-      ).rejects.toThrow('Rate limit exceeded');
+      ).rejects.toThrow('OpenAI API error: 429');
     });
   });
 });

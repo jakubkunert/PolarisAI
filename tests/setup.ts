@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom';
 
+// Add TextEncoder and TextDecoder for streaming tests
+global.TextEncoder = require('util').TextEncoder;
+global.TextDecoder = require('util').TextDecoder;
+
 // Mock environment variables for testing
 Object.defineProperty(process, 'env', {
   value: {

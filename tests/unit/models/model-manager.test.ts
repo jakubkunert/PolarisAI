@@ -166,7 +166,7 @@ describe('ModelManager', () => {
 
       await expect(
         manager.generateResponse('non-existent', 'Test prompt', config)
-      ).rejects.toThrow('Provider not found');
+      ).rejects.toThrow('Provider non-existent not found');
     });
 
     it('should throw error for unauthenticated provider', async () => {
@@ -215,7 +215,7 @@ describe('ModelManager', () => {
 
       await expect(
         manager.streamResponse('non-existent', 'Test prompt', config)
-      ).rejects.toThrow('Provider not found');
+      ).rejects.toThrow('Provider non-existent not found');
     });
   });
 
@@ -276,7 +276,7 @@ describe('ModelManager', () => {
     it('should throw error when setting non-existent provider as default', () => {
       expect(() => {
         manager.setDefaultProvider('non-existent');
-      }).toThrow('Provider not found');
+      }).toThrow('Provider non-existent not found');
     });
 
     it('should return current default provider', () => {

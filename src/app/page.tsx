@@ -13,7 +13,8 @@ import {
   CardContent,
   Badge,
   Checkbox,
-  useToast
+  useToast,
+  MarkdownRenderer
 } from '@/components/ui';
 import { usePersistedConfig } from '@/lib/hooks/usePersistedConfig';
 
@@ -25,6 +26,7 @@ interface ChatMessage {
   confidence?: number;
   reasoning?: string;
   metadata?: Record<string, unknown>;
+  isStreaming?: boolean;
 }
 
 interface AgentStatus {
@@ -115,8 +117,28 @@ export default function Home() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setLoading(true);
+
+    if (config.streamingEnabled) {
+      await handleStreamingResponse(currentInput);
+    } else {
+      await handleRegularResponse(currentInput);
+    }
+  };
+
+  const handleStreamingResponse = async (message: string) => {
+    const streamingMessage: ChatMessage = {
+      id: `streaming_${Date.now()}`,
+      content: '',
+      type: 'agent',
+      timestamp: new Date(),
+      isStreaming: true,
+      confidence: 0.9
+    };
+
+    setMessages(prev => [...prev, streamingMessage]);
 
     try {
       const response = await fetch('/api/chat', {
@@ -125,9 +147,94 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: input,
+          message,
           provider: config.selectedProvider || undefined,
-          apiKey: config.apiKey || undefined
+          apiKey: config.apiKey || undefined,
+          stream: true
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const data = JSON.parse(line);
+
+                if (data.type === 'content' && data.content) {
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === streamingMessage.id
+                      ? { ...msg, content: msg.content + data.content }
+                      : msg
+                  ));
+                } else if (data.type === 'end') {
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === streamingMessage.id
+                      ? {
+                          ...msg,
+                          isStreaming: false,
+                          confidence: data.confidence || 0.9,
+                          metadata: data.metadata
+                        }
+                      : msg
+                  ));
+                } else if (data.type === 'error') {
+                  throw new Error(data.error);
+                }
+              } catch (parseError) {
+                console.warn('Failed to parse streaming data:', parseError);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: `error_${Date.now()}`,
+        content: `Streaming error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'agent',
+        timestamp: new Date(),
+        confidence: 0
+      };
+      setMessages(prev => prev.filter(msg => msg.id !== streamingMessage.id).concat(errorMessage));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegularResponse = async (message: string) => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          provider: config.selectedProvider || undefined,
+          apiKey: config.apiKey || undefined,
+          stream: false
         }),
       });
 
@@ -261,6 +368,24 @@ export default function Home() {
                 </div>
 
                 <div className="pt-4">
+                  <Checkbox
+                    checked={config.streamingEnabled}
+                    onChange={(e) => updateConfig({ streamingEnabled: e.target.checked })}
+                    label="Enable streaming responses"
+                    description="Show responses as they're generated for a more interactive experience"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <Checkbox
+                    checked={config.showReasoning}
+                    onChange={(e) => updateConfig({ showReasoning: e.target.checked })}
+                    label="Show reasoning process"
+                    description="Display the agent's thinking and reasoning behind responses"
+                  />
+                </div>
+
+                <div className="pt-4">
                   <Button
                     variant="outline"
                     size="sm"
@@ -374,20 +499,45 @@ export default function Home() {
                             ? 'bg-blue-500 text-white ml-12'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
-                          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                          {message.type === 'user' ? (
+                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                          ) : (
+                            <MarkdownRenderer content={message.content} />
+                          )}
                         </div>
 
                         {message.type === 'agent' && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {message.confidence !== undefined && (
-                              <Badge variant="secondary" size="sm">
-                                Confidence: {Math.round(message.confidence * 100)}%
-                              </Badge>
-                            )}
-                            {message.reasoning && (
-                              <Badge variant="outline" size="sm">
-                                Reasoning Available
-                              </Badge>
+                          <div className="mt-2 space-y-2">
+                            <div className="flex flex-wrap gap-2">
+                              {message.isStreaming && (
+                                <Badge variant="outline" size="sm">
+                                  <span className="flex items-center gap-1">
+                                    <span className="animate-pulse">●</span>
+                                    Streaming...
+                                  </span>
+                                </Badge>
+                              )}
+                              {message.confidence !== undefined && (
+                                <Badge variant="secondary" size="sm">
+                                  Confidence: {Math.round(message.confidence * 100)}%
+                                </Badge>
+                              )}
+                              {config.showReasoning && message.reasoning && (
+                                <Badge variant="outline" size="sm">
+                                  💭 Reasoning Available
+                                </Badge>
+                              )}
+                            </div>
+
+                            {config.showReasoning && message.reasoning && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-blue-600 font-medium">🧠 Agent Reasoning:</span>
+                                </div>
+                                <div className="text-blue-800 whitespace-pre-wrap">
+                                  {message.reasoning}
+                                </div>
+                              </div>
                             )}
                           </div>
                         )}

@@ -4,6 +4,8 @@ interface PersistedConfig {
   selectedProvider: string;
   apiKey: string;
   rememberSettings: boolean;
+  streamingEnabled: boolean;
+  showReasoning: boolean;
 }
 
 const CONFIG_STORAGE_KEY = 'polaris-ai-config';
@@ -12,6 +14,8 @@ const defaultConfig: PersistedConfig = {
   selectedProvider: '',
   apiKey: '',
   rememberSettings: true,
+  streamingEnabled: false,
+  showReasoning: true,
 };
 
 export function usePersistedConfig(onSave?: (config: PersistedConfig) => void) {
