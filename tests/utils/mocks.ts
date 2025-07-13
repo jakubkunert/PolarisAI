@@ -11,7 +11,7 @@ import {
   Analysis,
   ActionPlan,
   Memory,
-  LearningUpdate
+  LearningUpdate,
 } from '@/core/types';
 
 // Mock Model Provider
@@ -37,7 +37,10 @@ export class MockModelProvider implements ModelProvider {
     return this._authenticated;
   }
 
-  async generateResponse(prompt: string, config: ModelConfig): Promise<string> {
+  async generateResponse(
+    prompt: string,
+    _config: ModelConfig
+  ): Promise<string> {
     if (!this._available) {
       throw new Error('Mock provider is not available');
     }
@@ -46,15 +49,29 @@ export class MockModelProvider implements ModelProvider {
     this._callCount++;
 
     // Check if this is a JSON request (for planner)
-    if (prompt.includes('JSON format') || prompt.includes('Return only the JSON') || prompt.includes('analyze the following user input')) {
-      if (prompt.includes('analyze the following user input') || prompt.includes('analyzeTask')) {
+    if (
+      prompt.includes('JSON format') ||
+      prompt.includes('Return only the JSON') ||
+      prompt.includes('analyze the following user input')
+    ) {
+      if (
+        prompt.includes('analyze the following user input') ||
+        prompt.includes('analyzeTask')
+      ) {
         return JSON.stringify({
           intent: 'mock-intent',
           confidence: 0.8,
           entities: { mockEntity: 'mockValue' },
-          context: { domain: 'general', complexity: 'medium', urgency: 'medium' }
+          context: {
+            domain: 'general',
+            complexity: 'medium',
+            urgency: 'medium',
+          },
         });
-      } else if (prompt.includes('createPlan') || prompt.includes('Create a detailed action plan')) {
+      } else if (
+        prompt.includes('createPlan') ||
+        prompt.includes('Create a detailed action plan')
+      ) {
         return JSON.stringify({
           id: `plan-${Date.now()}`,
           steps: [
@@ -63,21 +80,26 @@ export class MockModelProvider implements ModelProvider {
               action: 'mock-action',
               parameters: { mockParam: 'mockValue' },
               dependencies: [],
-              estimatedDuration: 1000
-            }
+              estimatedDuration: 1000,
+            },
           ],
           estimatedDuration: 1000,
-          requiresApproval: false
+          requiresApproval: false,
         });
       }
     }
 
-    const response = this._responses[this._responseIndex] || `Mock response to: ${prompt}`;
-    this._responseIndex = (this._responseIndex + 1) % (this._responses.length || 1);
+    const response =
+      this._responses[this._responseIndex] || `Mock response to: ${prompt}`;
+    this._responseIndex =
+      (this._responseIndex + 1) % (this._responses.length || 1);
     return response;
   }
 
-  async *streamResponse(prompt: string, config: ModelConfig): AsyncIterable<string> {
+  async *streamResponse(
+    prompt: string,
+    config: ModelConfig
+  ): AsyncIterable<string> {
     const response = await this.generateResponse(prompt, config);
     const chunks = response.split(' ');
     for (const chunk of chunks) {
@@ -89,14 +111,20 @@ export class MockModelProvider implements ModelProvider {
     return this._available;
   }
 
-  getStatus(): { authenticated: boolean; available: boolean; id: string; name: string; [key: string]: unknown } {
+  getStatus(): {
+    authenticated: boolean;
+    available: boolean;
+    id: string;
+    name: string;
+    [key: string]: unknown;
+  } {
     return {
       authenticated: this._authenticated,
       available: this._available,
       id: this.id,
       name: this.name,
       models: ['mock-model-1', 'mock-model-2'],
-      error: this._available ? undefined : 'Mock provider unavailable'
+      error: this._available ? undefined : 'Mock provider unavailable',
     };
   }
 
@@ -157,7 +185,7 @@ export class MockTool implements Tool {
     private _response: unknown = 'Mock tool response'
   ) {}
 
-  async execute(params: Record<string, unknown>): Promise<unknown> {
+  async execute(_params: Record<string, unknown>): Promise<unknown> {
     return this._response;
   }
 
@@ -172,7 +200,7 @@ export class MockTaskPlanner implements TaskPlanner {
   private _plan: ActionPlan | null = null;
   private _response: AgentResponse | null = null;
 
-  async analyzeTask(input: UserInput): Promise<Analysis> {
+  async analyzeTask(_input: UserInput): Promise<Analysis> {
     if (this._analysis) {
       return this._analysis;
     }
@@ -182,11 +210,11 @@ export class MockTaskPlanner implements TaskPlanner {
       confidence: 0.8,
       entities: { mockEntity: 'mockValue' },
       context: { mockContext: 'mockValue' },
-      previousConversation: []
+      previousConversation: [],
     };
   }
 
-  async createPlan(analysis: Analysis): Promise<ActionPlan> {
+  async createPlan(_analysis: Analysis): Promise<ActionPlan> {
     if (this._plan) {
       return this._plan;
     }
@@ -199,15 +227,15 @@ export class MockTaskPlanner implements TaskPlanner {
           action: 'mock-action',
           parameters: { mockParam: 'mockValue' },
           dependencies: [],
-          estimatedDuration: 1000
-        }
+          estimatedDuration: 1000,
+        },
       ],
       estimatedDuration: 1000,
-      requiresApproval: false
+      requiresApproval: false,
     };
   }
 
-  async executePlan(plan: ActionPlan): Promise<AgentResponse> {
+  async executePlan(_plan: ActionPlan): Promise<AgentResponse> {
     if (this._response) {
       return this._response;
     }
@@ -219,7 +247,7 @@ export class MockTaskPlanner implements TaskPlanner {
       timestamp: new Date(),
       type: 'text',
       confidence: 0.8,
-      reasoning: 'Mock reasoning'
+      reasoning: 'Mock reasoning',
     };
   }
 
@@ -234,6 +262,16 @@ export class MockTaskPlanner implements TaskPlanner {
 
   setResponse(response: AgentResponse): void {
     this._response = response;
+  }
+
+  async streamExecution(plan: ActionPlan): Promise<AsyncIterable<string>> {
+    return {
+      async *[Symbol.asyncIterator]() {
+        yield 'Mock streaming execution start';
+        yield `Executing plan: ${plan.id}`;
+        yield 'Mock streaming execution complete';
+      },
+    };
   }
 }
 
@@ -271,12 +309,12 @@ export class MockAgent implements ReasoningAgent {
     return this.planner.executePlan(plan);
   }
 
-  async reflect(response: AgentResponse): Promise<LearningUpdate> {
+  async reflect(_response: AgentResponse): Promise<LearningUpdate> {
     return {
       patterns: { mockPattern: 'mockValue' },
       preferences: { mockPreference: 'mockValue' },
       feedback: 'positive',
-      context: 'mock-context'
+      context: 'mock-context',
     };
   }
 
@@ -316,7 +354,7 @@ export const createMockUserInput = (
   timestamp: new Date(),
   type: 'text',
   metadata: {},
-  ...overrides
+  ...overrides,
 });
 
 export const createMockAgentResponse = (
@@ -330,7 +368,7 @@ export const createMockAgentResponse = (
   confidence: 0.8,
   reasoning: 'Mock agent reasoning',
   metadata: {},
-  ...overrides
+  ...overrides,
 });
 
 export const createMockActionStep = (
@@ -341,19 +379,17 @@ export const createMockActionStep = (
   parameters: { mockParam: 'mockValue' },
   dependencies: [],
   estimatedDuration: 1000,
-  ...overrides
+  ...overrides,
 });
 
-export const createMockMemory = (
-  overrides: Partial<Memory> = {}
-): Memory => ({
+export const createMockMemory = (overrides: Partial<Memory> = {}): Memory => ({
   id: `memory-${Date.now()}`,
   content: 'Mock memory content',
   timestamp: new Date(),
   importance: 0.5,
   tags: ['mock-tag'],
   embedding: [0.1, 0.2, 0.3],
-  ...overrides
+  ...overrides,
 });
 
 export const createMockModelConfig = (
@@ -365,7 +401,7 @@ export const createMockModelConfig = (
   frequencyPenalty: 0,
   presencePenalty: 0,
   systemPrompt: 'You are a helpful assistant',
-  ...overrides
+  ...overrides,
 });
 
 export const createMockAnalysis = (
@@ -376,7 +412,7 @@ export const createMockAnalysis = (
   entities: { mockEntity: 'mockValue' },
   context: { mockContext: 'mockValue' },
   previousConversation: [],
-  ...overrides
+  ...overrides,
 });
 
 export const createMockActionPlan = (
@@ -386,7 +422,7 @@ export const createMockActionPlan = (
   steps: [createMockActionStep()],
   estimatedDuration: 1000,
   requiresApproval: false,
-  ...overrides
+  ...overrides,
 });
 
 export const createMockLearningUpdate = (
@@ -396,7 +432,7 @@ export const createMockLearningUpdate = (
   preferences: { mockPreference: 'mockValue' },
   feedback: 'positive',
   context: 'mock-context',
-  ...overrides
+  ...overrides,
 });
 
 // HTTP Mock helpers

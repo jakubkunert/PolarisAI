@@ -140,7 +140,7 @@ export class OllamaProvider extends BaseModelProvider {
     }
 
     const decoder = new TextDecoder();
-    let buffer = '';
+    let fullResponse = '';
     let insideThinking = false;
 
     try {
@@ -155,48 +155,42 @@ export class OllamaProvider extends BaseModelProvider {
           try {
             const parsed = JSON.parse(line);
             if (parsed.response) {
-              buffer += parsed.response;
+              const chunkContent = parsed.response;
+              fullResponse += chunkContent;
 
-              // Process the buffer to filter out thinking tags
-              let output = '';
-              let i = 0;
-              while (i < buffer.length) {
-                if (buffer.substring(i).startsWith('<think>')) {
-                  insideThinking = true;
-                  const endIndex = buffer.indexOf('</think>', i);
-                  if (endIndex !== -1) {
-                    i = endIndex + 8; // Skip past </think>
-                    insideThinking = false;
-                  } else {
-                    break; // Wait for more content
-                  }
-                } else if (insideThinking) {
-                  i++;
-                } else {
-                  output += buffer[i];
-                  i++;
-                }
+              // Simple thinking tag filtering for streaming
+              // If we encounter <think>, start filtering
+              if (chunkContent.includes('<think>')) {
+                insideThinking = true;
               }
 
-              if (output && !insideThinking) {
-                // Clean the output chunk
-                const cleanedOutput = this.cleanResponse(output);
-                if (cleanedOutput !== output) {
-                  yield cleanedOutput;
-                  buffer = '';
-                } else {
-                  yield parsed.response;
-                }
+              // If we encounter </think>, stop filtering
+              if (chunkContent.includes('</think>')) {
+                insideThinking = false;
+                // Skip this chunk as it likely contains the closing tag
+                continue;
+              }
+
+              // Only yield content if we're not inside thinking tags
+              if (!insideThinking && chunkContent.trim()) {
+                yield chunkContent;
               }
             }
 
             // Check if generation is complete
             if (parsed.done === true) {
-              // Send any remaining buffer content
-              if (buffer && !insideThinking) {
-                const finalCleaned = this.cleanResponse(buffer);
-                if (finalCleaned.trim()) {
-                  yield finalCleaned;
+              // At the end, clean the full response and yield any remaining content
+              const cleaned = this.cleanResponse(fullResponse);
+              const alreadyStreamed = fullResponse.replace(
+                /<think>[\s\S]*?<\/think>/g,
+                ''
+              );
+
+              // Only yield additional content if cleaning revealed more than what was streamed
+              if (cleaned.length > alreadyStreamed.length) {
+                const remaining = cleaned.slice(alreadyStreamed.length);
+                if (remaining.trim()) {
+                  yield remaining;
                 }
               }
               return;

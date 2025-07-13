@@ -6,7 +6,7 @@ import {
   ModelProvider,
   ModelConfig,
   UserInput,
-  AgentResponse
+  AgentResponse,
 } from '../types';
 
 export class GeneralAssistantAgent extends BaseAgent {
@@ -63,7 +63,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         'creative-writing',
         'conversation',
         'analysis',
-        'reasoning'
+        'reasoning',
       ],
       systemPrompt,
       modelProvider,
@@ -80,14 +80,14 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         preferredResponseStyle: 'detailed',
         commonTopics: [],
         userExpertise: 'general',
-        interactionHistory: []
+        interactionHistory: [],
       },
       preferences: {
         responseLength: 'medium',
         technicalLevel: 'moderate',
         includeExamples: true,
-        showReasoning: true
-      }
+        showReasoning: true,
+      },
     };
   }
 
@@ -108,13 +108,16 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       description: 'Analyze text for sentiment, key points, and insights',
       parameters: {
         text: { type: 'string', required: true },
-        analysisType: { type: 'string', enum: ['sentiment', 'summary', 'keywords'] }
+        analysisType: {
+          type: 'string',
+          enum: ['sentiment', 'summary', 'keywords'],
+        },
       },
-      execute: async (params) => {
+      execute: async params => {
         const { text, analysisType } = params;
         const prompt = `Analyze the following text for ${analysisType}: "${text}"`;
         return await this.generateResponse(prompt);
-      }
+      },
     });
 
     this.addTool({
@@ -123,13 +126,13 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       description: 'Generate creative ideas and suggestions',
       parameters: {
         topic: { type: 'string', required: true },
-        quantity: { type: 'number', default: 5 }
+        quantity: { type: 'number', default: 5 },
       },
-      execute: async (params) => {
+      execute: async params => {
         const { topic, quantity } = params;
         const prompt = `Generate ${quantity} creative ideas for: ${topic}`;
         return await this.generateResponse(prompt);
-      }
+      },
     });
 
     this.addTool({
@@ -138,13 +141,16 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       description: 'Break down complex tasks into manageable steps',
       parameters: {
         task: { type: 'string', required: true },
-        difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] }
+        difficulty: {
+          type: 'string',
+          enum: ['beginner', 'intermediate', 'advanced'],
+        },
       },
-      execute: async (params) => {
+      execute: async params => {
         const { task, difficulty } = params;
         const prompt = `Create a ${difficulty} step-by-step guide for: ${task}`;
         return await this.generateResponse(prompt);
-      }
+      },
     });
   }
 
@@ -184,7 +190,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
     try {
       const ideas = await brainstormTool.execute({
         topic: input.content,
-        quantity: 5
+        quantity: 5,
       });
 
       return {
@@ -195,7 +201,8 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         type: 'text',
         confidence: 0.8,
         metadata: { tool: 'brainstorming', specialized: true },
-        reasoning: 'Detected brainstorming request, used specialized brainstorming tool'
+        reasoning:
+          'Detected brainstorming request, used specialized brainstorming tool',
       };
     } catch (_error) {
       return this.processInput(input);
@@ -211,7 +218,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
     try {
       const guide = await stepTool.execute({
         task: input.content,
-        difficulty: 'intermediate'
+        difficulty: 'intermediate',
       });
 
       return {
@@ -222,7 +229,8 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         type: 'text',
         confidence: 0.85,
         metadata: { tool: 'step-by-step', specialized: true },
-        reasoning: 'Detected step-by-step request, used specialized planning tool'
+        reasoning:
+          'Detected step-by-step request, used specialized planning tool',
       };
     } catch (_error) {
       return this.processInput(input);
@@ -238,7 +246,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
     try {
       const analysis = await analysisTool.execute({
         text: input.content,
-        analysisType: 'summary'
+        analysisType: 'summary',
       });
 
       return {
@@ -249,7 +257,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         type: 'text',
         confidence: 0.75,
         metadata: { tool: 'text-analysis', specialized: true },
-        reasoning: 'Detected analysis request, used specialized analysis tool'
+        reasoning: 'Detected analysis request, used specialized analysis tool',
       };
     } catch (_error) {
       return this.processInput(input);
@@ -286,8 +294,21 @@ Just ask me anything, and I'll do my best to help! I'm designed to be thoughtful
   }
 
   async streamUserInput(input: UserInput): Promise<AsyncIterable<string>> {
-    // Create a simple prompt for streaming
-    const prompt = `User: ${input.content}`;
-    return this.streamResponse(prompt);
+    // Use the proper reasoning pipeline for streaming
+    try {
+      const analysis = await this.analyze(input);
+      const plan = await this.plan(analysis);
+
+      // Use the planner's streaming execution
+      return await this.planner.streamExecution(plan);
+    } catch (error) {
+      // Fallback to simple streaming if reasoning pipeline fails
+      console.warn(
+        'Streaming reasoning pipeline failed, falling back to simple response:',
+        error
+      );
+      const prompt = `User: ${input.content}\n\nProvide a helpful response.`;
+      return this.streamResponse(prompt);
+    }
   }
 }

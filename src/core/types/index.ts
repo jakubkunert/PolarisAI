@@ -36,7 +36,13 @@ export interface ModelProvider {
   generateResponse(prompt: string, config: ModelConfig): Promise<string>;
   streamResponse(prompt: string, config: ModelConfig): AsyncIterable<string>;
   isAvailable(): Promise<boolean>;
-  getStatus(): { authenticated: boolean; available: boolean; id: string; name: string; [key: string]: unknown };
+  getStatus(): {
+    authenticated: boolean;
+    available: boolean;
+    id: string;
+    name: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface Tool {
@@ -98,6 +104,7 @@ export interface TaskPlanner {
   analyzeTask(input: UserInput): Promise<Analysis>;
   createPlan(analysis: Analysis): Promise<ActionPlan>;
   executePlan(plan: ActionPlan): Promise<AgentResponse>;
+  streamExecution(plan: ActionPlan): Promise<AsyncIterable<string>>;
 }
 
 export interface ReasoningAgent {

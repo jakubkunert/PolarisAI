@@ -3,6 +3,7 @@ import {
   UserInput,
   Analysis,
   ActionPlan,
+  ActionStep,
   AgentResponse,
   ModelProvider,
   ModelConfig,
@@ -24,6 +25,31 @@ export class BasicTaskPlanner implements TaskPlanner {
     this.modelConfig = modelConfig;
     this.agentId = agentId;
     this.systemPrompt = systemPrompt;
+  }
+
+  private extractJsonFromResponse(response: string): unknown {
+    // Remove thinking tags
+    let cleaned = response.replace(/<think>[\s\S]*?<\/think>/g, '');
+
+    // Remove markdown code blocks and extract JSON
+    const jsonBlockMatch = cleaned.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonBlockMatch) {
+      cleaned = jsonBlockMatch[1];
+    }
+
+    // Remove any remaining markdown formatting
+    cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
+
+    // Find JSON object in the response
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleaned = jsonMatch[0];
+    }
+
+    // Clean up extra whitespace
+    cleaned = cleaned.trim();
+
+    return JSON.parse(cleaned);
   }
 
   async analyzeTask(input: UserInput): Promise<Analysis> {
@@ -59,14 +85,17 @@ Return only the JSON object, no additional text.
         analysisPrompt,
         this.modelConfig
       );
-      const analysis = JSON.parse(response);
+      const analysis = this.extractJsonFromResponse(response) as Record<
+        string,
+        unknown
+      >;
 
       return {
-        intent: analysis.intent || 'Unknown intent',
-        confidence: analysis.confidence || 0.5,
-        entities: analysis.entities || {},
-        context: analysis.context || {},
-        previousConversation: analysis.previousConversation || [],
+        intent: (analysis.intent as string) || 'Unknown intent',
+        confidence: (analysis.confidence as number) || 0.5,
+        entities: (analysis.entities as Record<string, unknown>) || {},
+        context: (analysis.context as Record<string, unknown>) || {},
+        previousConversation: (analysis.previousConversation as string[]) || [],
       };
     } catch (error) {
       console.error('Error analyzing task:', error);
@@ -120,11 +149,14 @@ Return only the JSON object, no additional text.
         planningPrompt,
         this.modelConfig
       );
-      const plan = JSON.parse(response);
+      const plan = this.extractJsonFromResponse(response) as Record<
+        string,
+        unknown
+      >;
 
       return {
-        id: plan.id || `plan_${Date.now()}`,
-        steps: plan.steps || [
+        id: (plan.id as string) || `plan_${Date.now()}`,
+        steps: (plan.steps as ActionStep[]) || [
           {
             id: 'default_step',
             action: 'Provide helpful response',
@@ -133,8 +165,8 @@ Return only the JSON object, no additional text.
             estimatedDuration: 1,
           },
         ],
-        estimatedDuration: plan.estimatedDuration || 1,
-        requiresApproval: plan.requiresApproval || false,
+        estimatedDuration: (plan.estimatedDuration as number) || 1,
+        requiresApproval: (plan.requiresApproval as boolean) || false,
       };
     } catch (error) {
       console.error('Error creating plan:', error);
@@ -257,21 +289,17 @@ ${plan.steps.map((step, i) => `  ${i + 1}. ${step.action}`).join('\n')}
     const executionPrompt = `
 ${this.systemPrompt}
 
-Execute the following action plan and provide a helpful response:
+User request: ${plan.steps.map(step => step.parameters.intent || step.action).join(', ')}
 
-Plan ID: ${plan.id}
-Steps to execute:
-${plan.steps
-  .map(
-    step => `
-- Step: ${step.action}
-- Parameters: ${JSON.stringify(step.parameters)}
-`
-  )
-  .join('\n')}
+Please provide a helpful, conversational response to the user. Be friendly, direct, and genuinely useful.
 
-Please execute this plan and provide a comprehensive, helpful response to the user.
-Include your reasoning process and be specific about what you're doing.
+Do not include:
+- Plan IDs or execution details
+- Step-by-step breakdowns unless specifically requested
+- Internal processing information
+- Formal structure unless needed
+
+Just respond naturally and helpfully to what the user is asking for.
 `;
 
     try {
