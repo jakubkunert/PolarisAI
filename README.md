@@ -1,6 +1,89 @@
 # PolarisAI - Multi-Agent Reasoning System
 
+<div align="center">
+
+[![CI](https://github.com/jakubkunert/PolarisAI/workflows/CI/badge.svg)](https://github.com/jakubkunert/PolarisAI/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub issues](https://img.shields.io/github/issues/jakubkunert/PolarisAI)](https://github.com/jakubkunert/PolarisAI/issues)
+[![GitHub stars](https://img.shields.io/github/stars/jakubkunert/PolarisAI)](https://github.com/jakubkunert/PolarisAI/stargazers)
+
+**Modern multi-agent AI reasoning system with TypeScript, Next.js, and extensible architecture**
+
+[🚀 Quick Start](#-quick-start) • [📖 Documentation](docs/) • [🤝 Contributing](CONTRIBUTING.md) • [💬 Discussions](https://github.com/jakubkunert/PolarisAI/discussions)
+
+</div>
+
+---
+
 A modern, extensible multi-agent AI system built with Next.js, TypeScript, and modular architecture. PolarisAI provides a reasoning-based approach to AI interactions, supporting multiple LLM providers and designed for easy extension with new agents.
+
+## 🎯 **Demo**
+
+<div align="center">
+
+### 💬 **Interactive Chat Interface**
+```
+User: "How does the reasoning system work?"
+
+🤖 PolarisAI: Analyzing your question about the reasoning system...
+
+💭 REASONING PIPELINE:
+1. ANALYZE: Understanding your intent about system architecture
+2. PLAN: Structuring response about reasoning workflow
+3. EXECUTE: Explaining the four-phase pipeline
+4. REFLECT: Ensuring comprehensive coverage
+
+✨ RESPONSE:
+The reasoning system follows a structured pipeline:
+- Analyze → Plan → Execute → Reflect
+- Each agent processes input through these phases
+- Confidence scoring and reasoning explanations included
+- Memory system maintains context across conversations
+
+Confidence: 92%
+```
+
+**Try it yourself:**
+1. `bun dev` → Open `http://localhost:3000`
+2. Configure OpenAI API key in settings
+3. Start chatting with the reasoning system!
+
+</div>
+
+## 📊 **Project Status**
+
+<div align="center">
+
+| 🏗️ **Architecture** | 🧠 **AI Models** | 🔧 **Development** | 🚀 **Deployment** |
+|:---:|:---:|:---:|:---:|
+| ✅ Multi-Agent System | ✅ OpenAI GPT-4 | ✅ TypeScript | ✅ Self-Hosted |
+| ✅ Reasoning Pipeline | ✅ Ollama Local | ✅ Next.js 15 | ✅ Docker Ready |
+| ✅ Memory System | 🔄 Anthropic Claude | ✅ Comprehensive Tests | 🔄 Cloud Deploy |
+| ✅ Tool Integration | 🔄 Google Gemini | ✅ CI/CD Pipeline | 🔄 Scaling |
+
+**Legend:** ✅ Available • 🔄 In Progress • 📋 Planned
+
+</div>
+
+## 🎯 **Key Highlights**
+
+<div align="center">
+
+### 🏆 **Why Choose PolarisAI?**
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| 🧠 **Reasoning-First** | Every response includes confidence scores and reasoning explanations | ✅ |
+| 🔗 **Multi-Provider** | Works with OpenAI, Ollama, and extensible to any LLM provider | ✅ |
+| 🏗️ **Extensible** | Clean architecture for adding new agents and capabilities | ✅ |
+| 🔒 **Privacy-Focused** | Self-hosted by default, your data stays with you | ✅ |
+| 📚 **Well-Documented** | Comprehensive guides for users and contributors | ✅ |
+| 🧪 **Production-Ready** | TypeScript, tests, CI/CD, and professional development workflow | ✅ |
+
+</div>
 
 ## 🌟 Features
 
