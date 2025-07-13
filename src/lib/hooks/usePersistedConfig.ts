@@ -6,6 +6,7 @@ interface PersistedConfig {
   rememberSettings: boolean;
   streamingEnabled: boolean;
   showReasoning: boolean;
+  selectedOllamaModel: string;
 }
 
 const CONFIG_STORAGE_KEY = 'polaris-ai-config';
@@ -16,6 +17,7 @@ const defaultConfig: PersistedConfig = {
   rememberSettings: true,
   streamingEnabled: false,
   showReasoning: true,
+  selectedOllamaModel: '',
 };
 
 export function usePersistedConfig(onSave?: (config: PersistedConfig) => void) {

@@ -33,7 +33,7 @@ export class BasicTaskPlanner implements TaskPlanner {
     let cleaned = response.replace(/<think>[\s\S]*?<\/think>/g, '');
 
     // Remove markdown code blocks and extract JSON
-    const jsonBlockMatch = cleaned.match(/```json\s*([\s\S]*?)\s*```/);
+    const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (jsonBlockMatch) {
       cleaned = jsonBlockMatch[1];
     }
@@ -41,7 +41,7 @@ export class BasicTaskPlanner implements TaskPlanner {
     // Remove any remaining markdown formatting
     cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
 
-    // Find JSON object in the response
+    // Find JSON object in the response (handle multiple line JSON)
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       cleaned = jsonMatch[0];
@@ -50,7 +50,23 @@ export class BasicTaskPlanner implements TaskPlanner {
     // Clean up extra whitespace
     cleaned = cleaned.trim();
 
-    return JSON.parse(cleaned);
+    // If still no valid JSON structure, try to find it in the original response
+    if (!cleaned.startsWith('{') || !cleaned.endsWith('}')) {
+      const fallbackMatch = response.match(/\{[\s\S]*?\}/);
+      if (fallbackMatch) {
+        cleaned = fallbackMatch[0];
+      }
+    }
+
+    try {
+      return JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('Failed to parse JSON from response:', response);
+      console.error('Cleaned content:', cleaned);
+      throw new Error(
+        `Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+      );
+    }
   }
 
   async analyzeTask(input: UserInput): Promise<Analysis> {

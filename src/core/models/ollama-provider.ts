@@ -290,4 +290,8 @@ export class OllamaProvider extends BaseModelProvider {
       baseUrl: this.baseUrl,
     };
   }
+
+  setModel(modelName: string): void {
+    this.defaultModel = modelName;
+  }
 }

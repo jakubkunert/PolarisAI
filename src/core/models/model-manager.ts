@@ -10,29 +10,28 @@ export class ModelManager {
     this.initializeProviders();
   }
 
+  async initialize() {
+    await this.autoAuthenticateLocalProviders();
+  }
+
   private initializeProviders() {
     // Register built-in providers
     this.registerProvider(new OpenAIProvider());
     this.registerProvider(new OllamaProvider());
-
-    // Auto-authenticate local providers
-    this.autoAuthenticateLocalProviders();
   }
 
   private async autoAuthenticateLocalProviders() {
-    // Run authentication in background for local providers
-    setTimeout(async () => {
-      for (const provider of this.providers.values()) {
-        if (provider.type === 'local') {
-          try {
-            await provider.authenticate();
-            console.log(`Auto-authenticated local provider: ${provider.id}`);
-          } catch (error) {
-            console.log(`Failed to auto-authenticate ${provider.id}:`, error);
-          }
+    // Authenticate local providers immediately
+    for (const provider of this.providers.values()) {
+      if (provider.type === 'local') {
+        try {
+          await provider.authenticate();
+          console.log(`Auto-authenticated local provider: ${provider.id}`);
+        } catch (error) {
+          console.log(`Failed to auto-authenticate ${provider.id}:`, error);
         }
       }
-    }, 0);
+    }
   }
 
   registerProvider(provider: ModelProvider): void {
@@ -244,6 +243,13 @@ export class ModelManager {
     }
 
     return status;
+  }
+
+  updateOllamaModel(modelName: string): void {
+    const ollamaProvider = this.getProvider('ollama');
+    if (ollamaProvider && ollamaProvider.id === 'ollama') {
+      (ollamaProvider as OllamaProvider).setModel(modelName);
+    }
   }
 
   getDefaultModelConfig(): ModelConfig {

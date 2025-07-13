@@ -14,7 +14,7 @@ import {
   Badge,
   Checkbox,
   useToast,
-  MarkdownRenderer
+  MarkdownRenderer,
 } from '@/components/ui';
 import { usePersistedConfig } from '@/lib/hooks/usePersistedConfig';
 
@@ -46,27 +46,72 @@ interface Provider {
 
 // Icon components
 const SettingsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+    />
   </svg>
 );
 
 const SendIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+    />
   </svg>
 );
 
 const BotIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+    />
   </svg>
 );
 
 const UserIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+    />
   </svg>
 );
 
@@ -77,20 +122,53 @@ export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
 
-    const { showToast, ToastContainer } = useToast();
+  const { showToast, ToastContainer } = useToast();
 
-  const handleConfigSave = useCallback((savedConfig: { rememberSettings: boolean }) => {
-    if (savedConfig.rememberSettings) {
-      showToast('Settings saved automatically', 'success');
-    }
-  }, [showToast]);
-
-  const { config, isLoaded, updateConfig, clearConfig, toggleRememberSettings } = usePersistedConfig(handleConfigSave);
+  const {
+    config,
+    updateConfig,
+    isLoaded,
+    clearConfig,
+    toggleRememberSettings,
+  } = usePersistedConfig();
 
   useEffect(() => {
     fetchStatus();
   }, []);
+
+  const fetchOllamaModels = useCallback(async () => {
+    if (config.selectedProvider !== 'ollama') return;
+
+    setLoadingModels(true);
+    try {
+      const response = await fetch('/api/chat?action=get-ollama-models', {
+        method: 'PUT',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setOllamaModels(data.models);
+
+        // If no model is selected but models are available, select the first one
+        if (!config.selectedOllamaModel && data.models.length > 0) {
+          updateConfig({ selectedOllamaModel: data.models[0] });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch Ollama models:', error);
+    } finally {
+      setLoadingModels(false);
+    }
+  }, [config.selectedProvider, config.selectedOllamaModel, updateConfig]);
+
+  useEffect(() => {
+    if (config.selectedProvider === 'ollama' && isLoaded) {
+      fetchOllamaModels();
+    }
+  }, [config.selectedProvider, isLoaded, fetchOllamaModels]);
 
   const fetchStatus = async () => {
     try {
@@ -113,7 +191,7 @@ export default function Home() {
       id: `user_${Date.now()}`,
       content: input,
       type: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -135,7 +213,7 @@ export default function Home() {
       type: 'agent',
       timestamp: new Date(),
       isStreaming: true,
-      confidence: 0.9
+      confidence: 0.9,
     };
 
     setMessages(prev => [...prev, streamingMessage]);
@@ -150,7 +228,8 @@ export default function Home() {
           message,
           provider: config.selectedProvider || undefined,
           apiKey: config.apiKey || undefined,
-          stream: true
+          selectedOllamaModel: config.selectedOllamaModel || undefined,
+          stream: true,
         }),
       });
 
@@ -181,22 +260,26 @@ export default function Home() {
                 const data = JSON.parse(line);
 
                 if (data.type === 'content' && data.content) {
-                  setMessages(prev => prev.map(msg =>
-                    msg.id === streamingMessage.id
-                      ? { ...msg, content: msg.content + data.content }
-                      : msg
-                  ));
+                  setMessages(prev =>
+                    prev.map(msg =>
+                      msg.id === streamingMessage.id
+                        ? { ...msg, content: msg.content + data.content }
+                        : msg
+                    )
+                  );
                 } else if (data.type === 'end') {
-                  setMessages(prev => prev.map(msg =>
-                    msg.id === streamingMessage.id
-                      ? {
-                          ...msg,
-                          isStreaming: false,
-                          confidence: data.confidence || 0.9,
-                          metadata: data.metadata
-                        }
-                      : msg
-                  ));
+                  setMessages(prev =>
+                    prev.map(msg =>
+                      msg.id === streamingMessage.id
+                        ? {
+                            ...msg,
+                            isStreaming: false,
+                            confidence: data.confidence || 0.9,
+                            metadata: data.metadata,
+                          }
+                        : msg
+                    )
+                  );
                 } else if (data.type === 'error') {
                   throw new Error(data.error);
                 }
@@ -215,9 +298,11 @@ export default function Home() {
         content: `Streaming error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         type: 'agent',
         timestamp: new Date(),
-        confidence: 0
+        confidence: 0,
       };
-      setMessages(prev => prev.filter(msg => msg.id !== streamingMessage.id).concat(errorMessage));
+      setMessages(prev =>
+        prev.filter(msg => msg.id !== streamingMessage.id).concat(errorMessage)
+      );
     } finally {
       setLoading(false);
     }
@@ -234,7 +319,8 @@ export default function Home() {
           message,
           provider: config.selectedProvider || undefined,
           apiKey: config.apiKey || undefined,
-          stream: false
+          selectedOllamaModel: config.selectedOllamaModel || undefined,
+          stream: false,
         }),
       });
 
@@ -248,7 +334,7 @@ export default function Home() {
           timestamp: new Date(data.response.timestamp),
           confidence: data.response.confidence,
           reasoning: data.response.reasoning,
-          metadata: data.response.metadata
+          metadata: data.response.metadata,
         };
 
         setMessages(prev => [...prev, agentMessage]);
@@ -259,7 +345,7 @@ export default function Home() {
           content: `Error: ${data.error}`,
           type: 'agent',
           timestamp: new Date(),
-          confidence: 0
+          confidence: 0,
         };
         setMessages(prev => [...prev, errorMessage]);
       }
@@ -269,7 +355,7 @@ export default function Home() {
         content: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         type: 'agent',
         timestamp: new Date(),
-        confidence: 0
+        confidence: 0,
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -287,9 +373,9 @@ export default function Home() {
   // Show loading state while configuration is being loaded
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
           <p className="text-gray-600">Loading configuration...</p>
         </div>
       </div>
@@ -298,16 +384,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="mx-auto max-w-6xl p-6">
         {/* Header */}
         <Card variant="gradient" className="mb-8">
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
                   PolarisAI
                 </CardTitle>
-                <CardDescription className="text-lg mt-2">
+                <CardDescription className="mt-2 text-lg">
                   Multi-Agent Reasoning System
                 </CardDescription>
               </div>
@@ -323,10 +409,10 @@ export default function Home() {
           </CardHeader>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Settings Panel */}
           {showSettings && (
-            <Card className="lg:col-span-1 h-fit">
+            <Card className="h-fit lg:col-span-1">
               <CardHeader>
                 <CardTitle>Configuration</CardTitle>
                 <CardDescription>
@@ -337,10 +423,12 @@ export default function Home() {
                 <Select
                   label="Model Provider"
                   value={config.selectedProvider}
-                  onChange={(e) => updateConfig({ selectedProvider: e.target.value })}
+                  onChange={e =>
+                    updateConfig({ selectedProvider: e.target.value })
+                  }
                   placeholder="Select a provider"
                 >
-                  {providers.map((provider) => (
+                  {providers.map(provider => (
                     <option key={provider.id} value={provider.id}>
                       {provider.name} ({provider.type})
                     </option>
@@ -352,10 +440,35 @@ export default function Home() {
                     type="password"
                     label="OpenAI API Key"
                     value={config.apiKey}
-                    onChange={(e) => updateConfig({ apiKey: e.target.value })}
+                    onChange={e => updateConfig({ apiKey: e.target.value })}
                     placeholder="sk-..."
                     helpText="Your API key is stored locally and never sent to our servers"
                   />
+                )}
+
+                {config.selectedProvider === 'ollama' && (
+                  <Select
+                    label="Ollama Model"
+                    value={config.selectedOllamaModel}
+                    onChange={e =>
+                      updateConfig({ selectedOllamaModel: e.target.value })
+                    }
+                    placeholder={
+                      loadingModels ? 'Loading models...' : 'Select a model'
+                    }
+                    disabled={loadingModels || ollamaModels.length === 0}
+                    helpText={
+                      ollamaModels.length === 0
+                        ? 'No models found. Make sure Ollama is running and has models installed.'
+                        : `${ollamaModels.length} model(s) available`
+                    }
+                  >
+                    {ollamaModels.map(model => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                  </Select>
                 )}
 
                 <div className="pt-4">
@@ -370,7 +483,9 @@ export default function Home() {
                 <div className="pt-4">
                   <Checkbox
                     checked={config.streamingEnabled}
-                    onChange={(e) => updateConfig({ streamingEnabled: e.target.checked })}
+                    onChange={e =>
+                      updateConfig({ streamingEnabled: e.target.checked })
+                    }
                     label="Enable streaming responses"
                     description="Show responses as they're generated for a more interactive experience"
                   />
@@ -379,7 +494,9 @@ export default function Home() {
                 <div className="pt-4">
                   <Checkbox
                     checked={config.showReasoning}
-                    onChange={(e) => updateConfig({ showReasoning: e.target.checked })}
+                    onChange={e =>
+                      updateConfig({ showReasoning: e.target.checked })
+                    }
                     label="Show reasoning process"
                     description="Display the agent's thinking and reasoning behind responses"
                   />
@@ -399,17 +516,28 @@ export default function Home() {
                   </Button>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <h3 className="font-medium mb-3">Provider Status</h3>
+                <div className="border-t pt-4">
+                  <h3 className="mb-3 font-medium">Provider Status</h3>
                   <div className="space-y-2">
-                    {providers.map((provider) => (
-                      <div key={provider.id} className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{provider.name}</span>
+                    {providers.map(provider => (
+                      <div
+                        key={provider.id}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-sm font-medium">
+                          {provider.name}
+                        </span>
                         <Badge
-                          variant={provider.status.available ? 'success' : 'destructive'}
+                          variant={
+                            provider.status.available
+                              ? 'success'
+                              : 'destructive'
+                          }
                           dot
                         >
-                          {provider.status.available ? 'Available' : 'Unavailable'}
+                          {provider.status.available
+                            ? 'Available'
+                            : 'Unavailable'}
                         </Badge>
                       </div>
                     ))}
@@ -417,8 +545,8 @@ export default function Home() {
                 </div>
 
                 {agentStatus && (
-                  <div className="pt-4 border-t">
-                    <h3 className="font-medium mb-3">Agent Status</h3>
+                  <div className="border-t pt-4">
+                    <h3 className="mb-3 font-medium">Agent Status</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Name:</span>
@@ -426,7 +554,11 @@ export default function Home() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Initialized:</span>
-                        <Badge variant={agentStatus.initialized ? 'success' : 'destructive'}>
+                        <Badge
+                          variant={
+                            agentStatus.initialized ? 'success' : 'destructive'
+                          }
+                        >
                           {agentStatus.initialized ? 'Yes' : 'No'}
                         </Badge>
                       </div>
@@ -437,9 +569,11 @@ export default function Home() {
                         </Badge>
                       </div>
                       <div className="mt-2">
-                        <span className="text-gray-600 text-sm">Capabilities:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {agentStatus.capabilities.map((cap) => (
+                        <span className="text-sm text-gray-600">
+                          Capabilities:
+                        </span>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {agentStatus.capabilities.map(cap => (
                             <Badge key={cap} variant="outline" size="sm">
                               {cap}
                             </Badge>
@@ -454,53 +588,63 @@ export default function Home() {
           )}
 
           {/* Chat Interface */}
-          <Card className={`${showSettings ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+          <Card
+            className={`${showSettings ? 'lg:col-span-2' : 'lg:col-span-3'}`}
+          >
             <CardContent className="p-0">
               {/* Messages */}
-              <div className="h-96 overflow-y-auto p-6 space-y-4">
+              <div className="h-96 space-y-4 overflow-y-auto p-6">
                 {messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="py-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500">
                       <BotIcon />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="mb-2 text-xl font-semibold text-gray-900">
                       Welcome to PolarisAI!
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="mb-4 text-gray-600">
                       Start a conversation with the General Assistant
                     </p>
-                    <div className="bg-blue-50 rounded-lg p-4 max-w-md mx-auto">
+                    <div className="mx-auto max-w-md rounded-lg bg-blue-50 p-4">
                       <p className="text-sm text-gray-700">
                         <span className="font-medium">Try asking:</span>
                       </p>
                       <div className="mt-2 space-y-1 text-sm text-gray-600">
                         <p>• &quot;How does the reasoning system work?&quot;</p>
-                        <p>• &quot;Help me brainstorm ideas for a project&quot;</p>
+                        <p>
+                          • &quot;Help me brainstorm ideas for a project&quot;
+                        </p>
                         <p>• &quot;Explain quantum computing&quot;</p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  messages.map((message) => (
+                  messages.map(message => (
                     <div key={message.id} className="flex gap-4">
                       {/* Avatar */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.type === 'user'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
+                      <div
+                        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                          message.type === 'user'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
                         {message.type === 'user' ? <UserIcon /> : <BotIcon />}
                       </div>
 
                       {/* Message */}
-                      <div className="flex-1 min-w-0">
-                        <div className={`rounded-lg p-4 ${
-                          message.type === 'user'
-                            ? 'bg-blue-500 text-white ml-12'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}>
+                      <div className="min-w-0 flex-1">
+                        <div
+                          className={`rounded-lg p-4 ${
+                            message.type === 'user'
+                              ? 'ml-12 bg-blue-500 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
                           {message.type === 'user' ? (
-                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                            <p className="whitespace-pre-wrap break-words">
+                              {message.content}
+                            </p>
                           ) : (
                             <MarkdownRenderer content={message.content} />
                           )}
@@ -519,7 +663,8 @@ export default function Home() {
                               )}
                               {message.confidence !== undefined && (
                                 <Badge variant="secondary" size="sm">
-                                  Confidence: {Math.round(message.confidence * 100)}%
+                                  Confidence:{' '}
+                                  {Math.round(message.confidence * 100)}%
                                 </Badge>
                               )}
                               {config.showReasoning && message.reasoning && (
@@ -530,11 +675,13 @@ export default function Home() {
                             </div>
 
                             {config.showReasoning && message.reasoning && (
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="text-blue-600 font-medium">🧠 Agent Reasoning:</span>
+                              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
+                                <div className="mb-2 flex items-center gap-2">
+                                  <span className="font-medium text-blue-600">
+                                    🧠 Agent Reasoning:
+                                  </span>
                                 </div>
-                                <div className="text-blue-800 whitespace-pre-wrap">
+                                <div className="whitespace-pre-wrap text-blue-800">
                                   {message.reasoning}
                                 </div>
                               </div>
@@ -548,18 +695,26 @@ export default function Home() {
 
                 {loading && (
                   <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-700">
                       <BotIcon />
                     </div>
                     <div className="flex-1">
-                      <div className="bg-gray-100 rounded-lg p-4">
+                      <div className="rounded-lg bg-gray-100 p-4">
                         <div className="flex items-center space-x-2">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                            <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                            <div
+                              className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                              style={{ animationDelay: '0.1s' }}
+                            ></div>
+                            <div
+                              className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                              style={{ animationDelay: '0.2s' }}
+                            ></div>
                           </div>
-                          <span className="text-sm text-gray-600">Thinking...</span>
+                          <span className="text-sm text-gray-600">
+                            Thinking...
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -572,10 +727,10 @@ export default function Home() {
                 <div className="flex gap-3">
                   <Textarea
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={e => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
-                    className="flex-1 min-h-[44px] resize-none"
+                    className="min-h-[44px] flex-1 resize-none"
                     rows={1}
                     disabled={loading}
                   />

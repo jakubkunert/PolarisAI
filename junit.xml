@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="236" failures="0" errors="0" time="2.425">
+  <testsuite name="Streaming API" errors="0" failures="0" skipped="3" timestamp="2025-07-13T21:16:51" time="0.465" tests="3">
+    <testcase classname="Streaming API should handle streaming requests" name="Streaming API should handle streaming requests" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="Streaming API should handle regular (non-streaming) requests" name="Streaming API should handle regular (non-streaming) requests" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="Streaming API should handle streaming errors gracefully" name="Streaming API should handle streaming errors gracefully" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+  <testsuite name="MarkdownRenderer" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:51" time="0.276" tests="21">
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders headings correctly" name="MarkdownRenderer Basic Markdown Rendering renders headings correctly" time="0.011">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders paragraphs correctly" name="MarkdownRenderer Basic Markdown Rendering renders paragraphs correctly" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders lists correctly" name="MarkdownRenderer Basic Markdown Rendering renders lists correctly" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders emphasis and strong text" name="MarkdownRenderer Basic Markdown Rendering renders emphasis and strong text" time="0.003">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders blockquotes correctly" name="MarkdownRenderer Basic Markdown Rendering renders blockquotes correctly" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders horizontal rules" name="MarkdownRenderer Basic Markdown Rendering renders horizontal rules" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Basic Markdown Rendering renders links with proper attributes" name="MarkdownRenderer Basic Markdown Rendering renders links with proper attributes" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Code Rendering renders inline code correctly" name="MarkdownRenderer Code Rendering renders inline code correctly" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Code Rendering renders code blocks without language" name="MarkdownRenderer Code Rendering renders code blocks without language" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Code Rendering renders code blocks with language and copy functionality" name="MarkdownRenderer Code Rendering renders code blocks with language and copy functionality" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Code Rendering handles copy functionality for code blocks" name="MarkdownRenderer Code Rendering handles copy functionality for code blocks" time="0.005">
+    </testcase>
+    <testcase classname="MarkdownRenderer Code Rendering shows different languages correctly" name="MarkdownRenderer Code Rendering shows different languages correctly" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Table Rendering renders tables correctly" name="MarkdownRenderer Table Rendering renders tables correctly" time="0.003">
+    </testcase>
+    <testcase classname="MarkdownRenderer GitHub Flavored Markdown renders strikethrough text" name="MarkdownRenderer GitHub Flavored Markdown renders strikethrough text" time="0">
+    </testcase>
+    <testcase classname="MarkdownRenderer GitHub Flavored Markdown renders task lists" name="MarkdownRenderer GitHub Flavored Markdown renders task lists" time="0.002">
+    </testcase>
+    <testcase classname="MarkdownRenderer Edge Cases handles empty content" name="MarkdownRenderer Edge Cases handles empty content" time="0">
+    </testcase>
+    <testcase classname="MarkdownRenderer Edge Cases handles content with only whitespace" name="MarkdownRenderer Edge Cases handles content with only whitespace" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Edge Cases applies custom className" name="MarkdownRenderer Edge Cases applies custom className" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Edge Cases handles malformed markdown gracefully" name="MarkdownRenderer Edge Cases handles malformed markdown gracefully" time="0.001">
+    </testcase>
+    <testcase classname="MarkdownRenderer Copy Functionality Edge Cases handles copy failure gracefully" name="MarkdownRenderer Copy Functionality Edge Cases handles copy failure gracefully" time="0.053">
+    </testcase>
+    <testcase classname="MarkdownRenderer Copy Functionality Edge Cases resets copy state after timeout" name="MarkdownRenderer Copy Functionality Edge Cases resets copy state after timeout" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="Reasoning Display Toggle" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:51" time="0.068" tests="5">
+    <testcase classname="Reasoning Display Toggle should show reasoning when toggle is enabled" name="Reasoning Display Toggle should show reasoning when toggle is enabled" time="0.003">
+    </testcase>
+    <testcase classname="Reasoning Display Toggle should hide reasoning when toggle is disabled" name="Reasoning Display Toggle should hide reasoning when toggle is disabled" time="0.001">
+    </testcase>
+    <testcase classname="Reasoning Display Toggle should toggle reasoning display when checkbox is clicked" name="Reasoning Display Toggle should toggle reasoning display when checkbox is clicked" time="0.003">
+    </testcase>
+    <testcase classname="Reasoning Display Toggle should always show confidence badge regardless of reasoning toggle" name="Reasoning Display Toggle should always show confidence badge regardless of reasoning toggle" time="0.002">
+    </testcase>
+    <testcase classname="Reasoning Display Toggle should not show reasoning elements when message has no reasoning" name="Reasoning Display Toggle should not show reasoning elements when message has no reasoning" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Complete Chat Flow Integration" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:51" time="0.048" tests="13">
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle a complete conversation with multiple turns" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle a complete conversation with multiple turns" time="0.002">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle different input types gracefully" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle different input types gracefully" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should maintain conversation context and memory" name="Complete Chat Flow Integration Full Chat Conversation Flow should maintain conversation context and memory" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle learning and reflection correctly" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle learning and reflection correctly" time="0.002">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle provider switching during conversation" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle provider switching during conversation" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle complex reasoning workflows" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle complex reasoning workflows" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle error recovery gracefully" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle error recovery gracefully" time="0.001">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle concurrent requests properly" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle concurrent requests properly" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should track conversation metrics correctly" name="Complete Chat Flow Integration Full Chat Conversation Flow should track conversation metrics correctly" time="0.001">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration Full Chat Conversation Flow should handle cleanup properly after conversation" name="Complete Chat Flow Integration Full Chat Conversation Flow should handle cleanup properly after conversation" time="0.001">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration ModelManager Integration should work with multiple providers through ModelManager" name="Complete Chat Flow Integration ModelManager Integration should work with multiple providers through ModelManager" time="0">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration ModelManager Integration should handle provider authentication flow" name="Complete Chat Flow Integration ModelManager Integration should handle provider authentication flow" time="0.006">
+    </testcase>
+    <testcase classname="Complete Chat Flow Integration ModelManager Integration should get best available provider automatically" name="Complete Chat Flow Integration ModelManager Integration should get best available provider automatically" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Type Factory Functions" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.072" tests="59">
+    <testcase classname="Type Factory Functions createUserInput should create a UserInput with default values" name="Type Factory Functions createUserInput should create a UserInput with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserInput should accept overrides" name="Type Factory Functions createUserInput should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserInput should generate unique IDs" name="Type Factory Functions createUserInput should generate unique IDs" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createAgentResponse should create an AgentResponse with default values" name="Type Factory Functions createAgentResponse should create an AgentResponse with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createAgentResponse should accept overrides" name="Type Factory Functions createAgentResponse should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createModelConfig should create a ModelConfig with default values" name="Type Factory Functions createModelConfig should create a ModelConfig with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createModelConfig should accept overrides" name="Type Factory Functions createModelConfig should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createAnalysis should create an Analysis with default values" name="Type Factory Functions createAnalysis should create an Analysis with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createAnalysis should accept overrides" name="Type Factory Functions createAnalysis should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createActionStep should create an ActionStep with default values" name="Type Factory Functions createActionStep should create an ActionStep with default values" time="0.002">
+    </testcase>
+    <testcase classname="Type Factory Functions createActionStep should accept overrides" name="Type Factory Functions createActionStep should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createActionPlan should create an ActionPlan with default values" name="Type Factory Functions createActionPlan should create an ActionPlan with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createActionPlan should accept overrides" name="Type Factory Functions createActionPlan should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createMemory should create a Memory with default values" name="Type Factory Functions createMemory should create a Memory with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createMemory should accept overrides" name="Type Factory Functions createMemory should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createLearningUpdate should create a LearningUpdate with default values" name="Type Factory Functions createLearningUpdate should create a LearningUpdate with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createLearningUpdate should accept overrides" name="Type Factory Functions createLearningUpdate should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createPrivacySettings should create PrivacySettings with default values" name="Type Factory Functions createPrivacySettings should create PrivacySettings with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createPrivacySettings should accept overrides" name="Type Factory Functions createPrivacySettings should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserPreferences should create UserPreferences with default values" name="Type Factory Functions createUserPreferences should create UserPreferences with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserPreferences should accept overrides" name="Type Factory Functions createUserPreferences should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createSubscriptionInfo should create SubscriptionInfo with default values" name="Type Factory Functions createSubscriptionInfo should create SubscriptionInfo with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createSubscriptionInfo should accept overrides" name="Type Factory Functions createSubscriptionInfo should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createAgentConfig should create AgentConfig with default values" name="Type Factory Functions createAgentConfig should create AgentConfig with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createAgentConfig should accept overrides" name="Type Factory Functions createAgentConfig should accept overrides" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserProfile should create UserProfile with default values" name="Type Factory Functions createUserProfile should create UserProfile with default values" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createUserProfile should accept overrides" name="Type Factory Functions createUserProfile should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Type Factory Functions createChatSession should create ChatSession with default values" name="Type Factory Functions createChatSession should create ChatSession with default values" time="0.001">
+    </testcase>
+    <testcase classname="Type Factory Functions createChatSession should accept overrides" name="Type Factory Functions createChatSession should accept overrides" time="0">
+    </testcase>
+    <testcase classname="Utility Functions validateType should return true for valid object with required fields" name="Utility Functions validateType should return true for valid object with required fields" time="0">
+    </testcase>
+    <testcase classname="Utility Functions validateType should return false for object missing required fields" name="Utility Functions validateType should return false for object missing required fields" time="0">
+    </testcase>
+    <testcase classname="Utility Functions validateType should return false for null or undefined" name="Utility Functions validateType should return false for null or undefined" time="0">
+    </testcase>
+    <testcase classname="Utility Functions validateType should return false for non-object types" name="Utility Functions validateType should return false for non-object types" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepClone should clone primitive values" name="Utility Functions deepClone should clone primitive values" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepClone should clone Date objects" name="Utility Functions deepClone should clone Date objects" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepClone should clone arrays" name="Utility Functions deepClone should clone arrays" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepClone should clone objects" name="Utility Functions deepClone should clone objects" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepClone should handle nested structures" name="Utility Functions deepClone should handle nested structures" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepMerge should merge objects deeply" name="Utility Functions deepMerge should merge objects deeply" time="0.001">
+    </testcase>
+    <testcase classname="Utility Functions deepMerge should handle arrays" name="Utility Functions deepMerge should handle arrays" time="0">
+    </testcase>
+    <testcase classname="Utility Functions deepMerge should handle Date objects" name="Utility Functions deepMerge should handle Date objects" time="0.001">
+    </testcase>
+    <testcase classname="Utility Functions deepMerge should not modify original objects" name="Utility Functions deepMerge should not modify original objects" time="0">
+    </testcase>
+    <testcase classname="Utility Functions createUniqueId should generate unique IDs" name="Utility Functions createUniqueId should generate unique IDs" time="0">
+    </testcase>
+    <testcase classname="Utility Functions createUniqueId should use default prefix" name="Utility Functions createUniqueId should use default prefix" time="0">
+    </testcase>
+    <testcase classname="Utility Functions createUniqueId should use custom prefix" name="Utility Functions createUniqueId should use custom prefix" time="0">
+    </testcase>
+    <testcase classname="Utility Functions createUniqueId should include timestamp and random parts" name="Utility Functions createUniqueId should include timestamp and random parts" time="0">
+    </testcase>
+    <testcase classname="Utility Functions sanitizeUserInput should remove HTML brackets" name="Utility Functions sanitizeUserInput should remove HTML brackets" time="0">
+    </testcase>
+    <testcase classname="Utility Functions sanitizeUserInput should remove javascript: protocol" name="Utility Functions sanitizeUserInput should remove javascript: protocol" time="0">
+    </testcase>
+    <testcase classname="Utility Functions sanitizeUserInput should remove event handlers" name="Utility Functions sanitizeUserInput should remove event handlers" time="0.001">
+    </testcase>
+    <testcase classname="Utility Functions sanitizeUserInput should trim whitespace" name="Utility Functions sanitizeUserInput should trim whitespace" time="0">
+    </testcase>
+    <testcase classname="Utility Functions sanitizeUserInput should handle empty string" name="Utility Functions sanitizeUserInput should handle empty string" time="0">
+    </testcase>
+    <testcase classname="Utility Functions isValidEmail should return true for valid emails" name="Utility Functions isValidEmail should return true for valid emails" time="0">
+    </testcase>
+    <testcase classname="Utility Functions isValidEmail should return false for invalid emails" name="Utility Functions isValidEmail should return false for invalid emails" time="0">
+    </testcase>
+    <testcase classname="Utility Functions isValidEmail should handle empty string" name="Utility Functions isValidEmail should handle empty string" time="0">
+    </testcase>
+    <testcase classname="Utility Functions formatTimestamp should format timestamp to ISO string" name="Utility Functions formatTimestamp should format timestamp to ISO string" time="0">
+    </testcase>
+    <testcase classname="Utility Functions formatTimestamp should handle different timezones" name="Utility Functions formatTimestamp should handle different timezones" time="0">
+    </testcase>
+    <testcase classname="Utility Functions parseTimestamp should parse ISO string to Date" name="Utility Functions parseTimestamp should parse ISO string to Date" time="0">
+    </testcase>
+    <testcase classname="Utility Functions parseTimestamp should handle invalid date strings" name="Utility Functions parseTimestamp should handle invalid date strings" time="0">
+    </testcase>
+    <testcase classname="Utility Functions parseTimestamp should handle various date formats" name="Utility Functions parseTimestamp should handle various date formats" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ModelManager" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.051" tests="38">
+    <testcase classname="ModelManager Constructor should initialize with built-in providers" name="ModelManager Constructor should initialize with built-in providers" time="0">
+    </testcase>
+    <testcase classname="ModelManager Constructor should set default provider" name="ModelManager Constructor should set default provider" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Provider Registration should register new provider" name="ModelManager Provider Registration should register new provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Registration should add to providers list" name="ModelManager Provider Registration should add to providers list" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Registration should replace existing provider with same id" name="ModelManager Provider Registration should replace existing provider with same id" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Registration should set first registered provider as default if none exists" name="ModelManager Provider Registration should set first registered provider as default if none exists" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Retrieval should get provider by id" name="ModelManager Provider Retrieval should get provider by id" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Retrieval should return undefined for non-existent provider" name="ModelManager Provider Retrieval should return undefined for non-existent provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Retrieval should get all providers" name="ModelManager Provider Retrieval should get all providers" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Retrieval should get available providers" name="ModelManager Provider Retrieval should get available providers" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Provider Authentication should authenticate provider successfully" name="ModelManager Provider Authentication should authenticate provider successfully" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Authentication should fail authentication for non-existent provider" name="ModelManager Provider Authentication should fail authentication for non-existent provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Authentication should get authenticated providers" name="ModelManager Provider Authentication should get authenticated providers" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Authentication should handle authentication errors gracefully" name="ModelManager Provider Authentication should handle authentication errors gracefully" time="0">
+    </testcase>
+    <testcase classname="ModelManager Response Generation should generate response using specified provider" name="ModelManager Response Generation should generate response using specified provider" time="0.002">
+    </testcase>
+    <testcase classname="ModelManager Response Generation should throw error for non-existent provider" name="ModelManager Response Generation should throw error for non-existent provider" time="0.006">
+    </testcase>
+    <testcase classname="ModelManager Response Generation should throw error for unauthenticated provider" name="ModelManager Response Generation should throw error for unauthenticated provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Response Generation should validate model configuration" name="ModelManager Response Generation should validate model configuration" time="0">
+    </testcase>
+    <testcase classname="ModelManager Streaming Response should stream response using specified provider" name="ModelManager Streaming Response should stream response using specified provider" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Streaming Response should throw error for non-existent provider" name="ModelManager Streaming Response should throw error for non-existent provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Best Available Provider should return authenticated provider when available" name="ModelManager Best Available Provider should return authenticated provider when available" time="0">
+    </testcase>
+    <testcase classname="ModelManager Best Available Provider should return available provider when no authenticated providers" name="ModelManager Best Available Provider should return available provider when no authenticated providers" time="0">
+    </testcase>
+    <testcase classname="ModelManager Best Available Provider should return null when no providers available" name="ModelManager Best Available Provider should return null when no providers available" time="0">
+    </testcase>
+    <testcase classname="ModelManager Best Available Provider should prefer authenticated over non-authenticated" name="ModelManager Best Available Provider should prefer authenticated over non-authenticated" time="0">
+    </testcase>
+    <testcase classname="ModelManager Default Provider Management should set default provider" name="ModelManager Default Provider Management should set default provider" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Default Provider Management should throw error when setting non-existent provider as default" name="ModelManager Default Provider Management should throw error when setting non-existent provider as default" time="0">
+    </testcase>
+    <testcase classname="ModelManager Default Provider Management should return current default provider" name="ModelManager Default Provider Management should return current default provider" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Status should get status of all providers" name="ModelManager Provider Status should get status of all providers" time="0">
+    </testcase>
+    <testcase classname="ModelManager Provider Status should include provider availability in status" name="ModelManager Provider Status should include provider availability in status" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should provide default model configuration" name="ModelManager Model Configuration should provide default model configuration" time="0">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should validate model configuration" name="ModelManager Model Configuration should validate model configuration" time="0">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should reject invalid configuration" name="ModelManager Model Configuration should reject invalid configuration" time="0">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should validate temperature range" name="ModelManager Model Configuration should validate temperature range" time="0">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should validate maxTokens range" name="ModelManager Model Configuration should validate maxTokens range" time="0">
+    </testcase>
+    <testcase classname="ModelManager Model Configuration should validate topP range" name="ModelManager Model Configuration should validate topP range" time="0">
+    </testcase>
+    <testcase classname="ModelManager Error Handling should handle provider errors gracefully" name="ModelManager Error Handling should handle provider errors gracefully" time="0.001">
+    </testcase>
+    <testcase classname="ModelManager Error Handling should handle authentication failures" name="ModelManager Error Handling should handle authentication failures" time="0">
+    </testcase>
+    <testcase classname="ModelManager Error Handling should handle provider status errors" name="ModelManager Error Handling should handle provider status errors" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="OpenAIProvider" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.053" tests="22">
+    <testcase classname="OpenAIProvider Constructor should initialize with correct properties" name="OpenAIProvider Constructor should initialize with correct properties" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Constructor should accept custom model in constructor" name="OpenAIProvider Constructor should accept custom model in constructor" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Authentication should authenticate with valid API key" name="OpenAIProvider Authentication should authenticate with valid API key" time="0.001">
+    </testcase>
+    <testcase classname="OpenAIProvider Authentication should fail authentication with invalid API key" name="OpenAIProvider Authentication should fail authentication with invalid API key" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Authentication should fail authentication when no API key provided" name="OpenAIProvider Authentication should fail authentication when no API key provided" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Authentication should handle network errors during authentication" name="OpenAIProvider Authentication should handle network errors during authentication" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Response Generation should generate response successfully" name="OpenAIProvider Response Generation should generate response successfully" time="0.001">
+    </testcase>
+    <testcase classname="OpenAIProvider Response Generation should throw error when not authenticated" name="OpenAIProvider Response Generation should throw error when not authenticated" time="0.005">
+    </testcase>
+    <testcase classname="OpenAIProvider Response Generation should handle API errors during generation" name="OpenAIProvider Response Generation should handle API errors during generation" time="0.002">
+    </testcase>
+    <testcase classname="OpenAIProvider Response Generation should handle malformed API responses" name="OpenAIProvider Response Generation should handle malformed API responses" time="0.001">
+    </testcase>
+    <testcase classname="OpenAIProvider Response Generation should use correct model configuration" name="OpenAIProvider Response Generation should use correct model configuration" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Streaming Response should stream response chunks" name="OpenAIProvider Streaming Response should stream response chunks" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Streaming Response should handle streaming errors" name="OpenAIProvider Streaming Response should handle streaming errors" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Availability should return true for availability (remote provider)" name="OpenAIProvider Availability should return true for availability (remote provider)" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Status should return correct status when not authenticated" name="OpenAIProvider Status should return correct status when not authenticated" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Status should return correct status when authenticated" name="OpenAIProvider Status should return correct status when authenticated" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Configuration Validation should validate temperature range" name="OpenAIProvider Configuration Validation should validate temperature range" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Configuration Validation should validate maxTokens range" name="OpenAIProvider Configuration Validation should validate maxTokens range" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Configuration Validation should validate topP range" name="OpenAIProvider Configuration Validation should validate topP range" time="0.001">
+    </testcase>
+    <testcase classname="OpenAIProvider Edge Cases should handle empty prompts" name="OpenAIProvider Edge Cases should handle empty prompts" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Edge Cases should handle very long prompts" name="OpenAIProvider Edge Cases should handle very long prompts" time="0">
+    </testcase>
+    <testcase classname="OpenAIProvider Edge Cases should handle rate limiting" name="OpenAIProvider Edge Cases should handle rate limiting" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="GeneralAssistantAgent" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.041" tests="28">
+    <testcase classname="GeneralAssistantAgent Constructor should initialize with correct properties" name="GeneralAssistantAgent Constructor should initialize with correct properties" time="0.002">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Constructor should have correct system prompt" name="GeneralAssistantAgent Constructor should have correct system prompt" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Initialization should initialize successfully" name="GeneralAssistantAgent Initialization should initialize successfully" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Initialization should handle initialization errors gracefully" name="GeneralAssistantAgent Initialization should handle initialization errors gracefully" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Initialization should load memory during initialization" name="GeneralAssistantAgent Initialization should load memory during initialization" time="0.001">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Memory Management should create memory with correct structure" name="GeneralAssistantAgent Memory Management should create memory with correct structure" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Memory Management should store and retrieve memories" name="GeneralAssistantAgent Memory Management should store and retrieve memories" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Task Planning should create task planner with correct configuration" name="GeneralAssistantAgent Task Planning should create task planner with correct configuration" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Task Planning should analyze user input correctly" name="GeneralAssistantAgent Task Planning should analyze user input correctly" time="0.001">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Task Planning should create action plan from analysis" name="GeneralAssistantAgent Task Planning should create action plan from analysis" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Task Planning should execute action plan" name="GeneralAssistantAgent Task Planning should execute action plan" time="0.001">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Specialized Input Handling should handle brainstorming requests" name="GeneralAssistantAgent Specialized Input Handling should handle brainstorming requests" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Specialized Input Handling should handle step-by-step requests" name="GeneralAssistantAgent Specialized Input Handling should handle step-by-step requests" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Specialized Input Handling should handle analysis requests" name="GeneralAssistantAgent Specialized Input Handling should handle analysis requests" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Specialized Input Handling should handle general queries when no specialization matches" name="GeneralAssistantAgent Specialized Input Handling should handle general queries when no specialization matches" time="0.001">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Reflection and Learning should reflect on responses and generate learning updates" name="GeneralAssistantAgent Reflection and Learning should reflect on responses and generate learning updates" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Reflection and Learning should provide positive feedback for high confidence responses" name="GeneralAssistantAgent Reflection and Learning should provide positive feedback for high confidence responses" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Reflection and Learning should provide negative feedback for low confidence responses" name="GeneralAssistantAgent Reflection and Learning should provide negative feedback for low confidence responses" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Capabilities Description should provide detailed capabilities description" name="GeneralAssistantAgent Capabilities Description should provide detailed capabilities description" time="0.001">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Capabilities Description should include usage examples" name="GeneralAssistantAgent Capabilities Description should include usage examples" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Error Handling should handle provider errors gracefully" name="GeneralAssistantAgent Error Handling should handle provider errors gracefully" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Error Handling should handle empty input gracefully" name="GeneralAssistantAgent Error Handling should handle empty input gracefully" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Error Handling should handle provider failures during processing" name="GeneralAssistantAgent Error Handling should handle provider failures during processing" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Status Management should return correct status before initialization" name="GeneralAssistantAgent Status Management should return correct status before initialization" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Status Management should return correct status after initialization" name="GeneralAssistantAgent Status Management should return correct status after initialization" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Status Management should update status after processing" name="GeneralAssistantAgent Status Management should update status after processing" time="0">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Cleanup should cleanup resources properly" name="GeneralAssistantAgent Cleanup should cleanup resources properly" time="0.002">
+    </testcase>
+    <testcase classname="GeneralAssistantAgent Cleanup should handle cleanup gracefully" name="GeneralAssistantAgent Cleanup should handle cleanup gracefully" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Deployment Configuration" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.042" tests="20">
+    <testcase classname="Deployment Configuration getDeploymentConfig should return correct deployment configuration" name="Deployment Configuration getDeploymentConfig should return correct deployment configuration" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration getDeploymentConfig should return the same configuration on multiple calls" name="Deployment Configuration getDeploymentConfig should return the same configuration on multiple calls" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration getDeploymentConfig should have correct mode" name="Deployment Configuration getDeploymentConfig should have correct mode" time="0.001">
+    </testcase>
+    <testcase classname="Deployment Configuration getDeploymentConfig should have all features enabled by default" name="Deployment Configuration getDeploymentConfig should have all features enabled by default" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration getDeploymentConfig should have unlimited limits by default" name="Deployment Configuration getDeploymentConfig should have unlimited limits by default" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration isFeatureEnabled should return true for analytics feature" name="Deployment Configuration isFeatureEnabled should return true for analytics feature" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration isFeatureEnabled should return true for teamCollaboration feature" name="Deployment Configuration isFeatureEnabled should return true for teamCollaboration feature" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration isFeatureEnabled should return true for customDomain feature" name="Deployment Configuration isFeatureEnabled should return true for customDomain feature" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration isFeatureEnabled should return true for advancedSecurity feature" name="Deployment Configuration isFeatureEnabled should return true for advancedSecurity feature" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration isFeatureEnabled should work with all available features" name="Deployment Configuration isFeatureEnabled should work with all available features" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration checkLimit should return true for maxAgents limit with any value" name="Deployment Configuration checkLimit should return true for maxAgents limit with any value" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration checkLimit should return true for maxConversations limit with any value" name="Deployment Configuration checkLimit should return true for maxConversations limit with any value" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration checkLimit should return true for maxMemorySize limit with any value" name="Deployment Configuration checkLimit should return true for maxMemorySize limit with any value" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration checkLimit should return true for apiRequestsPerMonth limit with any value" name="Deployment Configuration checkLimit should return true for apiRequestsPerMonth limit with any value" time="0.001">
+    </testcase>
+    <testcase classname="Deployment Configuration checkLimit should work with all available limits" name="Deployment Configuration checkLimit should work with all available limits" time="0.002">
+    </testcase>
+    <testcase classname="Deployment Configuration Configuration Structure should have proper TypeScript types" name="Deployment Configuration Configuration Structure should have proper TypeScript types" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration Configuration Structure should not have additional properties" name="Deployment Configuration Configuration Structure should not have additional properties" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration Edge Cases should handle feature checks with undefined gracefully" name="Deployment Configuration Edge Cases should handle feature checks with undefined gracefully" time="0.001">
+    </testcase>
+    <testcase classname="Deployment Configuration Edge Cases should handle limit checks with negative values" name="Deployment Configuration Edge Cases should handle limit checks with negative values" time="0">
+    </testcase>
+    <testcase classname="Deployment Configuration Edge Cases should handle limit checks with zero values" name="Deployment Configuration Edge Cases should handle limit checks with zero values" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Type Guards" errors="0" failures="0" skipped="0" timestamp="2025-07-13T21:16:52" time="0.035" tests="27">
+    <testcase classname="Type Guards isUserInput should return true for valid UserInput" name="Type Guards isUserInput should return true for valid UserInput" time="0">
+    </testcase>
+    <testcase classname="Type Guards isUserInput should return false for invalid UserInput" name="Type Guards isUserInput should return false for invalid UserInput" time="0">
+    </testcase>
+    <testcase classname="Type Guards isUserInput should return false for null or undefined" name="Type Guards isUserInput should return false for null or undefined" time="0">
+    </testcase>
+    <testcase classname="Type Guards isUserInput should return false for invalid type" name="Type Guards isUserInput should return false for invalid type" time="0">
+    </testcase>
+    <testcase classname="Type Guards isAgentResponse should return true for valid AgentResponse" name="Type Guards isAgentResponse should return true for valid AgentResponse" time="0">
+    </testcase>
+    <testcase classname="Type Guards isAgentResponse should return false for invalid confidence values" name="Type Guards isAgentResponse should return false for invalid confidence values" time="0">
+    </testcase>
+    <testcase classname="Type Guards isAgentResponse should return false for invalid type" name="Type Guards isAgentResponse should return false for invalid type" time="0.001">
+    </testcase>
+    <testcase classname="Type Guards isModelConfig should return true for valid ModelConfig" name="Type Guards isModelConfig should return true for valid ModelConfig" time="0">
+    </testcase>
+    <testcase classname="Type Guards isModelConfig should return false for missing required fields" name="Type Guards isModelConfig should return false for missing required fields" time="0">
+    </testcase>
+    <testcase classname="Type Guards isModelConfig should return false for non-numeric values" name="Type Guards isModelConfig should return false for non-numeric values" time="0">
+    </testcase>
+    <testcase classname="Type Guards isModelProvider should return true for valid ModelProvider" name="Type Guards isModelProvider should return true for valid ModelProvider" time="0">
+    </testcase>
+    <testcase classname="Type Guards isModelProvider should return false for invalid type" name="Type Guards isModelProvider should return false for invalid type" time="0">
+    </testcase>
+    <testcase classname="Type Guards isTool should return true for valid Tool" name="Type Guards isTool should return true for valid Tool" time="0">
+    </testcase>
+    <testcase classname="Type Guards isTool should return false for missing execute function" name="Type Guards isTool should return false for missing execute function" time="0">
+    </testcase>
+    <testcase classname="Type Guards isAnalysis should return true for valid Analysis" name="Type Guards isAnalysis should return true for valid Analysis" time="0">
+    </testcase>
+    <testcase classname="Type Guards isAnalysis should return false for invalid confidence range" name="Type Guards isAnalysis should return false for invalid confidence range" time="0">
+    </testcase>
+    <testcase classname="Type Guards isActionStep should return true for valid ActionStep" name="Type Guards isActionStep should return true for valid ActionStep" time="0.001">
+    </testcase>
+    <testcase classname="Type Guards isActionStep should return false for invalid dependencies" name="Type Guards isActionStep should return false for invalid dependencies" time="0">
+    </testcase>
+    <testcase classname="Type Guards isActionPlan should return true for valid ActionPlan" name="Type Guards isActionPlan should return true for valid ActionPlan" time="0">
+    </testcase>
+    <testcase classname="Type Guards isActionPlan should return false for invalid steps" name="Type Guards isActionPlan should return false for invalid steps" time="0">
+    </testcase>
+    <testcase classname="Type Guards isMemory should return true for valid Memory" name="Type Guards isMemory should return true for valid Memory" time="0">
+    </testcase>
+    <testcase classname="Type Guards isMemory should return false for invalid tags" name="Type Guards isMemory should return false for invalid tags" time="0">
+    </testcase>
+    <testcase classname="Type Guards isLearningUpdate should return true for valid LearningUpdate" name="Type Guards isLearningUpdate should return true for valid LearningUpdate" time="0">
+    </testcase>
+    <testcase classname="Type Guards isLearningUpdate should return false for invalid feedback" name="Type Guards isLearningUpdate should return false for invalid feedback" time="0">
+    </testcase>
+    <testcase classname="Type Guards isSubscriptionInfo should return true for valid SubscriptionInfo" name="Type Guards isSubscriptionInfo should return true for valid SubscriptionInfo" time="0">
+    </testcase>
+    <testcase classname="Type Guards isSubscriptionInfo should return false for invalid plan" name="Type Guards isSubscriptionInfo should return false for invalid plan" time="0.002">
+    </testcase>
+    <testcase classname="Type Guards isSubscriptionInfo should return false for invalid status" name="Type Guards isSubscriptionInfo should return false for invalid status" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>
