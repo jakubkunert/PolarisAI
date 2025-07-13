@@ -19,10 +19,47 @@ export class OllamaProvider extends BaseModelProvider {
     try {
       const available = await this.isAvailable();
       this.isAuthenticated = available;
+
+      if (available) {
+        console.log(
+          `Ollama authenticated successfully using model: ${this.defaultModel}`
+        );
+      } else {
+        console.error(
+          'Ollama authentication failed: Service not available or no models found'
+        );
+      }
+
       return available;
-    } catch (_error) {
+    } catch (error) {
+      console.error('Ollama authentication error:', error);
+      this.isAuthenticated = false;
       return false;
     }
+  }
+
+  private cleanResponse(response: string): string {
+    // Remove thinking process tags
+    let cleaned = response.replace(/<think>[\s\S]*?<\/think>/g, '');
+
+    // Remove internal execution details
+    cleaned = cleaned.replace(/\*\*Plan ID:.*?\*\*/g, '');
+    cleaned = cleaned.replace(/\*\*Steps to execute:.*?\*\*/g, '');
+    cleaned = cleaned.replace(/\*\*Estimated Duration:.*?\*\*/g, '');
+    cleaned = cleaned.replace(/\*\*Requires Approval:.*?\*\*/g, '');
+    cleaned = cleaned.replace(/\*\*Reasoning Process:.*?\*\*/g, '');
+
+    // Remove excessive internal structure
+    cleaned = cleaned.replace(/- Step:.*?\n/g, '');
+    cleaned = cleaned.replace(/- Parameters:.*?\n/g, '');
+    cleaned = cleaned.replace(/\*\*Response:\*\*/g, '');
+    cleaned = cleaned.replace(/\*\*Conclusion:\*\*/g, '');
+
+    // Clean up extra whitespace and formatting
+    cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n');
+    cleaned = cleaned.trim();
+
+    return cleaned;
   }
 
   async generateResponse(prompt: string, config: ModelConfig): Promise<string> {
@@ -44,21 +81,29 @@ export class OllamaProvider extends BaseModelProvider {
           temperature: config.temperature,
           top_p: config.topP,
           num_predict: config.maxTokens,
-          repeat_penalty: config.frequencyPenalty + 1, // Ollama uses different scale
+          repeat_penalty: config.frequencyPenalty + 1,
         },
         stream: false,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Ollama API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
-    return data.response || '';
+    const rawResponse = data.response || '';
+
+    // Clean the response before returning
+    return this.cleanResponse(rawResponse);
   }
 
-  async* streamResponse(prompt: string, config: ModelConfig): AsyncIterable<string> {
+  async *streamResponse(
+    prompt: string,
+    config: ModelConfig
+  ): AsyncIterable<string> {
     if (!this.isAuthenticated) {
       throw new Error('Ollama provider not available');
     }
@@ -84,7 +129,9 @@ export class OllamaProvider extends BaseModelProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Ollama API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const reader = response.body?.getReader();
@@ -93,6 +140,8 @@ export class OllamaProvider extends BaseModelProvider {
     }
 
     const decoder = new TextDecoder();
+    let buffer = '';
+    let insideThinking = false;
 
     try {
       while (true) {
@@ -106,11 +155,50 @@ export class OllamaProvider extends BaseModelProvider {
           try {
             const parsed = JSON.parse(line);
             if (parsed.response) {
-              yield parsed.response;
+              buffer += parsed.response;
+
+              // Process the buffer to filter out thinking tags
+              let output = '';
+              let i = 0;
+              while (i < buffer.length) {
+                if (buffer.substring(i).startsWith('<think>')) {
+                  insideThinking = true;
+                  const endIndex = buffer.indexOf('</think>', i);
+                  if (endIndex !== -1) {
+                    i = endIndex + 8; // Skip past </think>
+                    insideThinking = false;
+                  } else {
+                    break; // Wait for more content
+                  }
+                } else if (insideThinking) {
+                  i++;
+                } else {
+                  output += buffer[i];
+                  i++;
+                }
+              }
+
+              if (output && !insideThinking) {
+                // Clean the output chunk
+                const cleanedOutput = this.cleanResponse(output);
+                if (cleanedOutput !== output) {
+                  yield cleanedOutput;
+                  buffer = '';
+                } else {
+                  yield parsed.response;
+                }
+              }
             }
 
             // Check if generation is complete
             if (parsed.done === true) {
+              // Send any remaining buffer content
+              if (buffer && !insideThinking) {
+                const finalCleaned = this.cleanResponse(buffer);
+                if (finalCleaned.trim()) {
+                  yield finalCleaned;
+                }
+              }
               return;
             }
           } catch (_e) {
@@ -132,13 +220,35 @@ export class OllamaProvider extends BaseModelProvider {
 
       if (response.ok) {
         const data = await response.json();
-        // Check if our model is available
         const models = data.models || [];
-        return models.some((model: { name: string }) => model.name === this.defaultModel);
+
+        if (models.length === 0) {
+          return false; // No models available
+        }
+
+        // Check if our preferred model is available
+        const hasPreferredModel = models.some(
+          (model: { name: string }) => model.name === this.defaultModel
+        );
+
+        if (hasPreferredModel) {
+          return true;
+        }
+
+        // If preferred model not available, use the first available model
+        const firstModel = models[0];
+        if (firstModel && firstModel.name) {
+          console.log(
+            `Ollama: Preferred model '${this.defaultModel}' not found. Using '${firstModel.name}' instead.`
+          );
+          this.defaultModel = firstModel.name;
+          return true;
+        }
       }
 
       return false;
-    } catch (_error) {
+    } catch (error) {
+      console.error('Ollama availability check failed:', error);
       return false;
     }
   }

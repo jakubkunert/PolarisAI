@@ -14,6 +14,25 @@ export class ModelManager {
     // Register built-in providers
     this.registerProvider(new OpenAIProvider());
     this.registerProvider(new OllamaProvider());
+
+    // Auto-authenticate local providers
+    this.autoAuthenticateLocalProviders();
+  }
+
+  private async autoAuthenticateLocalProviders() {
+    // Run authentication in background for local providers
+    setTimeout(async () => {
+      for (const provider of this.providers.values()) {
+        if (provider.type === 'local') {
+          try {
+            await provider.authenticate();
+            console.log(`Auto-authenticated local provider: ${provider.id}`);
+          } catch (error) {
+            console.log(`Failed to auto-authenticate ${provider.id}:`, error);
+          }
+        }
+      }
+    }, 0);
   }
 
   registerProvider(provider: ModelProvider): void {
