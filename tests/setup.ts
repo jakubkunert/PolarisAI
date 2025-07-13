@@ -4,6 +4,47 @@ import '@testing-library/jest-dom';
 global.TextEncoder = require('util').TextEncoder;
 global.TextDecoder = require('util').TextDecoder;
 
+// Add Request and Response globals for Next.js server components in Bun
+if (typeof Request === 'undefined') {
+  (global as any).Request = class MockRequest {
+    constructor(public url: string, public init: any = {}) {
+      this.method = init.method || 'GET';
+      this.headers = new Map(Object.entries(init.headers || {}));
+      this.body = init.body;
+    }
+    method: string;
+    headers: Map<string, string>;
+    body: any;
+
+    async json() {
+      return JSON.parse(this.body);
+    }
+
+    async text() {
+      return this.body;
+    }
+  };
+}
+
+if (typeof Response === 'undefined') {
+  (global as any).Response = class MockResponse {
+    constructor(public body: any, public init: any = {}) {
+      this.status = init.status || 200;
+      this.headers = new Map(Object.entries(init.headers || {}));
+    }
+    status: number;
+    headers: Map<string, string>;
+
+    async json() {
+      return JSON.parse(this.body);
+    }
+
+    async text() {
+      return this.body;
+    }
+  };
+}
+
 // Mock environment variables for testing
 Object.defineProperty(process, 'env', {
   value: {

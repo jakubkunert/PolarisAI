@@ -42,6 +42,9 @@ export class MockModelProvider implements ModelProvider {
       throw new Error('Mock provider is not available');
     }
 
+    // Always increment call count for any generateResponse call
+    this._callCount++;
+
     // Check if this is a JSON request (for planner)
     if (prompt.includes('JSON format') || prompt.includes('Return only the JSON') || prompt.includes('analyze the following user input')) {
       if (prompt.includes('analyze the following user input') || prompt.includes('analyzeTask')) {
@@ -69,7 +72,6 @@ export class MockModelProvider implements ModelProvider {
       }
     }
 
-    this._callCount++;
     const response = this._responses[this._responseIndex] || `Mock response to: ${prompt}`;
     this._responseIndex = (this._responseIndex + 1) % (this._responses.length || 1);
     return response;
