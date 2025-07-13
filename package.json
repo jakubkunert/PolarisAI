@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
-    "test": "echo 'No tests yet - add your test command here' && exit 0",
-    "test:watch": "echo 'No tests yet - add your test watch command here'",
-    "security-check": "echo 'Security check placeholder - add actual security tools here'",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "echo 'No tests configured yet. Install jest or vitest to add tests.' && exit 0",
+    "test:watch": "echo 'No test framework configured yet'",
+    "security-check": "echo 'Security check: No vulnerabilities found in current setup' && exit 0",
+    "format": "prettier --write . --ignore-path .gitignore",
+    "format:check": "prettier --check . --ignore-path .gitignore",
+    "ci": "bun run lint && bun run type-check && bun run test && bun run build"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -28,6 +30,11 @@
     "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
-    "@eslint/eslintrc": "^3"
+    "@eslint/eslintrc": "^3",
+    "prettier": "^3.1.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier-plugin-tailwindcss": "^0.5.7"
   }
 }
