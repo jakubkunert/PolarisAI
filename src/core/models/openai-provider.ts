@@ -133,7 +133,9 @@ export class OpenAIProvider extends BaseModelProvider {
         }
       }
     } finally {
-      reader.releaseLock();
+      if (reader && typeof reader.releaseLock === 'function') {
+        reader.releaseLock();
+      }
     }
   }
 

@@ -65,9 +65,9 @@ export class ModelManager {
         return await provider.isAvailable();
       }
 
-      // For remote providers, we need to check if they have valid credentials
-      // This is a simplified check - in a real app, you'd check stored credentials
-      return false; // Will be true after authentication
+      // For remote providers, check their authentication status
+      const status = provider.getStatus();
+      return status.authenticated;
     } catch (_error) {
       return false;
     }
@@ -76,10 +76,15 @@ export class ModelManager {
   async authenticateProvider(id: string, apiKey?: string): Promise<boolean> {
     const provider = this.getProvider(id);
     if (!provider) {
-      throw new Error(`Provider ${id} not found`);
+      return false;
     }
 
-    return await provider.authenticate(apiKey);
+    try {
+      return await provider.authenticate(apiKey);
+    } catch (error) {
+      console.error(`Authentication failed for provider ${id}:`, error);
+      return false;
+    }
   }
 
   async generateResponse(
@@ -90,6 +95,16 @@ export class ModelManager {
     const provider = this.getProvider(providerId);
     if (!provider) {
       throw new Error(`Provider ${providerId} not found`);
+    }
+
+    // Validate configuration
+    if (!this.validateModelConfig(config)) {
+      throw new Error('Invalid model configuration');
+    }
+
+    // Check if provider is authenticated (for remote providers)
+    if (provider.type === 'remote' && !await this.isProviderAuthenticated(provider)) {
+      throw new Error('Provider not authenticated');
     }
 
     return await provider.generateResponse(prompt, config);
@@ -109,20 +124,49 @@ export class ModelManager {
   }
 
   async getBestAvailableProvider(): Promise<ModelProvider | null> {
-    const providers = await this.getAuthenticatedProviders();
+    // First try to get authenticated providers
+    const authenticatedProviders = await this.getAuthenticatedProviders();
 
-    if (providers.length === 0) {
+    if (authenticatedProviders.length > 0) {
+      // Prioritize local providers for privacy
+      const localProviders = authenticatedProviders.filter(p => p.type === 'local');
+      if (localProviders.length > 0) {
+        return localProviders[0];
+      }
+      // Fall back to remote providers
+      return authenticatedProviders[0];
+    }
+
+    // If no authenticated providers, fall back to available providers
+    const availableProviders = this.getAvailableProviders();
+    if (availableProviders.length === 0) {
+      return null;
+    }
+
+    // Filter to only those that are actually available
+    const actuallyAvailable = [];
+    for (const provider of availableProviders) {
+      try {
+        if (await provider.isAvailable()) {
+          actuallyAvailable.push(provider);
+        }
+      } catch (error) {
+        // Skip providers that throw errors
+      }
+    }
+
+    if (actuallyAvailable.length === 0) {
       return null;
     }
 
     // Prioritize local providers for privacy
-    const localProviders = providers.filter(p => p.type === 'local');
+    const localProviders = actuallyAvailable.filter(p => p.type === 'local');
     if (localProviders.length > 0) {
       return localProviders[0];
     }
 
     // Fall back to remote providers
-    return providers[0];
+    return actuallyAvailable[0];
   }
 
   setDefaultProvider(id: string): void {
@@ -144,16 +188,29 @@ export class ModelManager {
     for (const [id, provider] of this.providers.entries()) {
       try {
         const isAvailable = await provider.isAvailable();
+        const providerStatus = provider.getStatus();
         status[id] = {
-          ...provider.getStatus(),
+          ...providerStatus,
           available: isAvailable,
         };
       } catch (error) {
-        status[id] = {
-          ...provider.getStatus(),
-          available: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
+        try {
+          const providerStatus = provider.getStatus();
+          status[id] = {
+            ...providerStatus,
+            available: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        } catch (statusError) {
+          // If even getStatus() fails, provide minimal info
+          status[id] = {
+            id: provider.id,
+            name: provider.name,
+            authenticated: false,
+            available: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
       }
     }
 

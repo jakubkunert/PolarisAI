@@ -18,6 +18,7 @@ import {
 export class MockModelProvider implements ModelProvider {
   private _responses: string[] = [];
   private _responseIndex = 0;
+  private _callCount = 0;
   private _authenticated = false;
   private _available = true;
 
@@ -28,6 +29,10 @@ export class MockModelProvider implements ModelProvider {
   ) {}
 
   async authenticate(apiKey?: string): Promise<boolean> {
+    if (!this._available) {
+      this._authenticated = false;
+      return false;
+    }
     this._authenticated = !!apiKey;
     return this._authenticated;
   }
@@ -64,6 +69,7 @@ export class MockModelProvider implements ModelProvider {
       }
     }
 
+    this._callCount++;
     const response = this._responses[this._responseIndex] || `Mock response to: ${prompt}`;
     this._responseIndex = (this._responseIndex + 1) % (this._responses.length || 1);
     return response;
@@ -107,7 +113,7 @@ export class MockModelProvider implements ModelProvider {
   }
 
   getCallCount(): number {
-    return this._responseIndex;
+    return this._callCount;
   }
 }
 
