@@ -60,7 +60,7 @@ jobs:
         prerelease: ${{ contains(github.ref, '-') }}
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-${{ steps.release_notes.outputs.version }}
         path: .next/
