@@ -1,6 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Button,
+  Input,
+  Textarea,
+  Select,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Badge,
+  Checkbox,
+  useToast
+} from '@/components/ui';
+import { usePersistedConfig } from '@/lib/hooks/usePersistedConfig';
 
 interface ChatMessage {
   id: string;
@@ -27,15 +42,49 @@ interface Provider {
   status: Record<string, unknown>;
 }
 
+// Icon components
+const SettingsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+  </svg>
+);
+
+const BotIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>
+);
+
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
-  const [apiKey, setApiKey] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+
+    const { showToast, ToastContainer } = useToast();
+
+  const handleConfigSave = useCallback((savedConfig: { rememberSettings: boolean }) => {
+    if (savedConfig.rememberSettings) {
+      showToast('Settings saved automatically', 'success');
+    }
+  }, [showToast]);
+
+  const { config, isLoaded, updateConfig, clearConfig, toggleRememberSettings } = usePersistedConfig(handleConfigSave);
 
   useEffect(() => {
     fetchStatus();
@@ -77,8 +126,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           message: input,
-          provider: selectedProvider || undefined,
-          apiKey: apiKey || undefined
+          provider: config.selectedProvider || undefined,
+          apiKey: config.apiKey || undefined
         }),
       });
 
@@ -128,166 +177,275 @@ export default function Home() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">PolarisAI</h1>
-              <p className="text-gray-600">Multi-Agent Reasoning System</p>
-            </div>
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Settings
-            </button>
-          </div>
+  // Show loading state while configuration is being loaded
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading configuration...</p>
         </div>
+      </div>
+    );
+  }
 
-        {/* Settings Panel */}
-        {showSettings && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Configuration</h2>
-
-            <div className="space-y-4">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Header */}
+        <Card variant="gradient" className="mb-8">
+          <CardHeader>
+            <div className="flex justify-between items-center">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Model Provider
-                </label>
-                <select
-                  value={selectedProvider}
-                  onChange={(e) => setSelectedProvider(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  PolarisAI
+                </CardTitle>
+                <CardDescription className="text-lg mt-2">
+                  Multi-Agent Reasoning System
+                </CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowSettings(!showSettings)}
+                icon={<SettingsIcon />}
+              >
+                Settings
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Settings Panel */}
+          {showSettings && (
+            <Card className="lg:col-span-1 h-fit">
+              <CardHeader>
+                <CardTitle>Configuration</CardTitle>
+                <CardDescription>
+                  Configure your AI model provider and settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Select
+                  label="Model Provider"
+                  value={config.selectedProvider}
+                  onChange={(e) => updateConfig({ selectedProvider: e.target.value })}
+                  placeholder="Select a provider"
                 >
-                  <option value="">Select a provider</option>
                   {providers.map((provider) => (
                     <option key={provider.id} value={provider.id}>
                       {provider.name} ({provider.type})
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
 
-              {selectedProvider === 'openai' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OpenAI API Key
-                  </label>
-                  <input
+                {config.selectedProvider === 'openai' && (
+                  <Input
                     type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    label="OpenAI API Key"
+                    value={config.apiKey}
+                    onChange={(e) => updateConfig({ apiKey: e.target.value })}
                     placeholder="sk-..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    helpText="Your API key is stored locally and never sent to our servers"
+                  />
+                )}
+
+                <div className="pt-4">
+                  <Checkbox
+                    checked={config.rememberSettings}
+                    onChange={toggleRememberSettings}
+                    label="Remember settings"
+                    description="Keep your provider selection and API key saved between sessions"
                   />
                 </div>
-              )}
 
-              <div className="pt-4 border-t">
-                <h3 className="text-lg font-medium mb-2">Provider Status</h3>
-                <div className="space-y-2">
-                  {providers.map((provider) => (
-                    <div key={provider.id} className="flex justify-between items-center">
-                      <span className="text-sm text-gray-700">{provider.name}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        provider.status.available
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {provider.status.available ? 'Available' : 'Unavailable'}
-                      </span>
-                    </div>
-                  ))}
+                <div className="pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      clearConfig();
+                      showToast('Settings cleared', 'default');
+                    }}
+                    disabled={!config.selectedProvider && !config.apiKey}
+                  >
+                    Clear Settings
+                  </Button>
                 </div>
-              </div>
 
-              {agentStatus && (
                 <div className="pt-4 border-t">
-                  <h3 className="text-lg font-medium mb-2">Agent Status</h3>
-                  <div className="text-sm text-gray-700">
-                    <p><strong>Name:</strong> {agentStatus.name}</p>
-                    <p><strong>Initialized:</strong> {agentStatus.initialized ? 'Yes' : 'No'}</p>
-                    <p><strong>Memory Count:</strong> {agentStatus.memoryCount}</p>
-                    <p><strong>Capabilities:</strong> {agentStatus.capabilities.join(', ')}</p>
+                  <h3 className="font-medium mb-3">Provider Status</h3>
+                  <div className="space-y-2">
+                    {providers.map((provider) => (
+                      <div key={provider.id} className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{provider.name}</span>
+                        <Badge
+                          variant={provider.status.available ? 'success' : 'destructive'}
+                          dot
+                        >
+                          {provider.status.available ? 'Available' : 'Unavailable'}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* Chat Interface */}
-        <div className="bg-white rounded-lg shadow-sm">
-          {/* Messages */}
-          <div className="h-96 overflow-y-auto p-6 space-y-4">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500">
-                <p>Welcome to PolarisAI! Start a conversation with the General Assistant.</p>
-                <p className="text-sm mt-2">Try asking: &quot;How does the reasoning system work?&quot; or &quot;Help me brainstorm ideas for a project&quot;</p>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      message.type === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                    {message.type === 'agent' && (
-                      <div className="mt-2 text-xs opacity-75">
-                        {message.confidence !== undefined && (
-                          <p>Confidence: {Math.round(message.confidence * 100)}%</p>
-                        )}
-                        {message.reasoning && (
-                          <p className="mt-1">{message.reasoning}</p>
+                {agentStatus && (
+                  <div className="pt-4 border-t">
+                    <h3 className="font-medium mb-3">Agent Status</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium">{agentStatus.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Initialized:</span>
+                        <Badge variant={agentStatus.initialized ? 'success' : 'destructive'}>
+                          {agentStatus.initialized ? 'Yes' : 'No'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Memory:</span>
+                        <Badge variant="secondary">
+                          {agentStatus.memoryCount} items
+                        </Badge>
+                      </div>
+                      <div className="mt-2">
+                        <span className="text-gray-600 text-sm">Capabilities:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {agentStatus.capabilities.map((cap) => (
+                            <Badge key={cap} variant="outline" size="sm">
+                              {cap}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Chat Interface */}
+          <Card className={`${showSettings ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+            <CardContent className="p-0">
+              {/* Messages */}
+              <div className="h-96 overflow-y-auto p-6 space-y-4">
+                {messages.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BotIcon />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Welcome to PolarisAI!
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Start a conversation with the General Assistant
+                    </p>
+                    <div className="bg-blue-50 rounded-lg p-4 max-w-md mx-auto">
+                      <p className="text-sm text-gray-700">
+                        <span className="font-medium">Try asking:</span>
+                      </p>
+                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                        <p>• &quot;How does the reasoning system work?&quot;</p>
+                        <p>• &quot;Help me brainstorm ideas for a project&quot;</p>
+                        <p>• &quot;Explain quantum computing&quot;</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <div key={message.id} className="flex gap-4">
+                      {/* Avatar */}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        message.type === 'user'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {message.type === 'user' ? <UserIcon /> : <BotIcon />}
+                      </div>
+
+                      {/* Message */}
+                      <div className="flex-1 min-w-0">
+                        <div className={`rounded-lg p-4 ${
+                          message.type === 'user'
+                            ? 'bg-blue-500 text-white ml-12'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}>
+                          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                        </div>
+
+                        {message.type === 'agent' && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {message.confidence !== undefined && (
+                              <Badge variant="secondary" size="sm">
+                                Confidence: {Math.round(message.confidence * 100)}%
+                              </Badge>
+                            )}
+                            {message.reasoning && (
+                              <Badge variant="outline" size="sm">
+                                Reasoning Available
+                              </Badge>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
+                    </div>
+                  ))
+                )}
+
+                {loading && (
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center">
+                      <BotIcon />
+                    </div>
+                    <div className="flex-1">
+                      <div className="bg-gray-100 rounded-lg p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">Thinking...</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
-                  <p>Thinking...</p>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="border-t p-4">
+                <div className="flex gap-3">
+                  <Textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type your message..."
+                    className="flex-1 min-h-[44px] resize-none"
+                    rows={1}
+                    disabled={loading}
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={loading || !input.trim()}
+                    size="lg"
+                    variant="gradient"
+                    icon={<SendIcon />}
+                    loading={loading}
+                  >
+                    Send
+                  </Button>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="border-t p-4">
-            <div className="flex space-x-2">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                rows={1}
-                disabled={loading}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={loading || !input.trim()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Send
-              </button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
