@@ -1,0 +1,25 @@
+#!/bin/sh
+echo "🔍 Running pre-push checks..."
+
+echo "📝 Linting..."
+bun run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix linting errors before pushing."
+  exit 1
+fi
+
+echo "🔧 Type checking..."
+bun run type-check
+if [ $? -ne 0 ]; then
+  echo "❌ Type checking failed. Please fix type errors before pushing."
+  exit 1
+fi
+
+echo "🧪 Running tests..."
+bun run test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix failing tests before pushing."
+  exit 1
+fi
+
+echo "✅ All pre-push checks passed! 🚀"

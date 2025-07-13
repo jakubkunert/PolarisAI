@@ -51,14 +51,19 @@ export class ModelManager {
           authenticated.push(provider);
         }
       } catch (error) {
-        console.error(`Error checking authentication for ${provider.id}:`, error);
+        console.error(
+          `Error checking authentication for ${provider.id}:`,
+          error
+        );
       }
     }
 
     return authenticated;
   }
 
-  private async isProviderAuthenticated(provider: ModelProvider): Promise<boolean> {
+  private async isProviderAuthenticated(
+    provider: ModelProvider
+  ): Promise<boolean> {
     try {
       // For local providers, check if they're available
       if (provider.type === 'local') {
@@ -103,7 +108,10 @@ export class ModelManager {
     }
 
     // Check if provider is authenticated (for remote providers)
-    if (provider.type === 'remote' && !await this.isProviderAuthenticated(provider)) {
+    if (
+      provider.type === 'remote' &&
+      !(await this.isProviderAuthenticated(provider))
+    ) {
       throw new Error('Provider not authenticated');
     }
 
@@ -129,7 +137,9 @@ export class ModelManager {
 
     if (authenticatedProviders.length > 0) {
       // Prioritize local providers for privacy
-      const localProviders = authenticatedProviders.filter(p => p.type === 'local');
+      const localProviders = authenticatedProviders.filter(
+        p => p.type === 'local'
+      );
       if (localProviders.length > 0) {
         return localProviders[0];
       }
@@ -150,7 +160,7 @@ export class ModelManager {
         if (await provider.isAvailable()) {
           actuallyAvailable.push(provider);
         }
-      } catch (error) {
+      } catch (_error) {
         // Skip providers that throw errors
       }
     }
@@ -201,7 +211,7 @@ export class ModelManager {
             available: false,
             error: error instanceof Error ? error.message : 'Unknown error',
           };
-        } catch (statusError) {
+        } catch (_statusError) {
           // If even getStatus() fails, provide minimal info
           status[id] = {
             id: provider.id,
@@ -232,8 +242,10 @@ export class ModelManager {
       if (config.temperature < 0 || config.temperature > 1) return false;
       if (config.maxTokens < 1) return false;
       if (config.topP < 0 || config.topP > 1) return false;
-      if (config.frequencyPenalty < -2 || config.frequencyPenalty > 2) return false;
-      if (config.presencePenalty < -2 || config.presencePenalty > 2) return false;
+      if (config.frequencyPenalty < -2 || config.frequencyPenalty > 2)
+        return false;
+      if (config.presencePenalty < -2 || config.presencePenalty > 2)
+        return false;
 
       return true;
     } catch (_error) {
