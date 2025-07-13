@@ -199,6 +199,7 @@ export class MockTaskPlanner implements TaskPlanner {
   private _analysis: Analysis | null = null;
   private _plan: ActionPlan | null = null;
   private _response: AgentResponse | null = null;
+  private static _counter = 0;
 
   async analyzeTask(_input: UserInput): Promise<Analysis> {
     if (this._analysis) {
@@ -220,10 +221,10 @@ export class MockTaskPlanner implements TaskPlanner {
     }
 
     return {
-      id: `plan-${Date.now()}`,
+      id: `plan-${Date.now()}-${++MockTaskPlanner._counter}`,
       steps: [
         {
-          id: `step-${Date.now()}`,
+          id: `step-${Date.now()}-${++MockTaskPlanner._counter}`,
           action: 'mock-action',
           parameters: { mockParam: 'mockValue' },
           dependencies: [],
@@ -241,7 +242,7 @@ export class MockTaskPlanner implements TaskPlanner {
     }
 
     return {
-      id: `response-${Date.now()}`,
+      id: `response-${Date.now()}-${++MockTaskPlanner._counter}`,
       agentId: 'mock-agent',
       content: 'Mock execution response',
       timestamp: new Date(),

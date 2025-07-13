@@ -14,6 +14,7 @@ export class BasicTaskPlanner implements TaskPlanner {
   private modelConfig: ModelConfig;
   private agentId: string;
   private systemPrompt: string;
+  private static counter = 0;
 
   constructor(
     modelProvider: ModelProvider,
@@ -173,7 +174,7 @@ Return only the JSON object, no additional text.
 
       // Fallback plan
       return {
-        id: `fallback_plan_${Date.now()}`,
+        id: `fallback_plan_${Date.now()}_${++BasicTaskPlanner.counter}`,
         steps: [
           {
             id: 'fallback_step',
@@ -216,7 +217,7 @@ Just respond naturally and helpfully to what the user is asking for.
       const confidence = this.calculateConfidence(plan, response);
 
       return {
-        id: `response_${Date.now()}`,
+        id: `response_${Date.now()}_${++BasicTaskPlanner.counter}`,
         agentId: this.agentId,
         content: response,
         timestamp: new Date(),
