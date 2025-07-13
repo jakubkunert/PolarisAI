@@ -6,7 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests yet - add your test command here' && exit 0",
+    "test:watch": "echo 'No tests yet - add your test watch command here'",
+    "security-check": "echo 'Security check placeholder - add actual security tools here'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "react": "^19.0.0",
