@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Button,
   Input,
@@ -125,6 +125,10 @@ export default function Home() {
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
 
+  // Track if models have been fetched for current session
+  const modelsFetchedRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
+
   const { showToast, ToastContainer } = useToast();
 
   const {
@@ -140,7 +144,29 @@ export default function Home() {
   }, []);
 
   const fetchOllamaModels = useCallback(async () => {
-    if (config.selectedProvider !== 'ollama') return;
+    // Use current values from the closure
+    const currentProvider = config.selectedProvider;
+    const currentModel = config.selectedOllamaModel;
+
+    if (currentProvider !== 'ollama') return;
+
+    // Skip if already fetched and models exist
+    if (modelsFetchedRef.current && ollamaModels.length > 0) {
+      console.log('⏭️ Skipping Ollama models fetch - already have models');
+      return;
+    }
+
+    // Prevent rapid successive calls (debounce for 2 seconds)
+    const now = Date.now();
+    if (now - lastFetchTimeRef.current < 2000) {
+      console.log(
+        '⏭️ Skipping Ollama models fetch - too soon since last fetch'
+      );
+      return;
+    }
+
+    console.log('🔄 Fetching Ollama models...');
+    lastFetchTimeRef.current = now;
 
     setLoadingModels(true);
     try {
@@ -151,24 +177,65 @@ export default function Home() {
 
       if (data.success) {
         setOllamaModels(data.models);
+        modelsFetchedRef.current = true;
+        console.log('✅ Ollama models fetched successfully:', data.models);
 
         // If no model is selected but models are available, select the first one
-        if (!config.selectedOllamaModel && data.models.length > 0) {
+        if (!currentModel && data.models.length > 0) {
           updateConfig({ selectedOllamaModel: data.models[0] });
         }
       }
     } catch (error) {
-      console.error('Failed to fetch Ollama models:', error);
+      console.error('❌ Failed to fetch Ollama models:', error);
     } finally {
       setLoadingModels(false);
     }
-  }, [config.selectedProvider, config.selectedOllamaModel, updateConfig]);
+  }, [
+    config.selectedProvider,
+    config.selectedOllamaModel,
+    updateConfig,
+    ollamaModels.length,
+  ]);
 
-  useEffect(() => {
-    if (config.selectedProvider === 'ollama' && isLoaded) {
+  const handleSettingsToggle = useCallback(() => {
+    const newShowSettings = !showSettings;
+    console.log('🔧 Settings toggled:', newShowSettings ? 'OPEN' : 'CLOSE');
+    setShowSettings(newShowSettings);
+
+    // Only fetch Ollama models when opening settings and Ollama is selected
+    if (newShowSettings && config.selectedProvider === 'ollama') {
+      console.log(
+        '🔄 Fetching Ollama models because settings opened with Ollama selected'
+      );
       fetchOllamaModels();
     }
-  }, [config.selectedProvider, isLoaded, fetchOllamaModels]);
+  }, [showSettings, config.selectedProvider, fetchOllamaModels]);
+
+  const handleProviderChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedProvider = e.target.value;
+      console.log('🔄 Provider changed to:', selectedProvider);
+      updateConfig({ selectedProvider });
+
+      // Reset models fetched flag and timestamp when provider changes
+      modelsFetchedRef.current = false;
+      lastFetchTimeRef.current = 0;
+
+      // Clear models when switching away from ollama
+      if (selectedProvider !== 'ollama') {
+        setOllamaModels([]);
+      }
+
+      // Fetch Ollama models when user selects Ollama
+      if (selectedProvider === 'ollama') {
+        console.log(
+          '🔄 Fetching Ollama models because provider changed to Ollama'
+        );
+        fetchOllamaModels();
+      }
+    },
+    [updateConfig, fetchOllamaModels]
+  );
 
   const fetchStatus = async () => {
     try {
@@ -400,7 +467,7 @@ export default function Home() {
               <Button
                 variant="ghost"
                 size="lg"
-                onClick={() => setShowSettings(!showSettings)}
+                onClick={handleSettingsToggle}
                 icon={<SettingsIcon />}
               >
                 Settings
@@ -423,9 +490,7 @@ export default function Home() {
                 <Select
                   label="Model Provider"
                   value={config.selectedProvider}
-                  onChange={e =>
-                    updateConfig({ selectedProvider: e.target.value })
-                  }
+                  onChange={handleProviderChange}
                   placeholder="Select a provider"
                 >
                   {providers.map(provider => (
