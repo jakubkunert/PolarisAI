@@ -9,7 +9,7 @@ interface ChatMessage {
   timestamp: Date;
   confidence?: number;
   reasoning?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface AgentStatus {
@@ -24,7 +24,7 @@ interface Provider {
   id: string;
   name: string;
   type: 'local' | 'remote';
-  status: any;
+  status: Record<string, unknown>;
 }
 
 export default function Home() {
@@ -45,7 +45,7 @@ export default function Home() {
     try {
       const response = await fetch('/api/chat');
       const data = await response.json();
-      
+
       if (data.success) {
         setProviders(data.providers);
         setAgentStatus(data.agent);
@@ -151,7 +151,7 @@ export default function Home() {
         {showSettings && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Configuration</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -193,8 +193,8 @@ export default function Home() {
                     <div key={provider.id} className="flex justify-between items-center">
                       <span className="text-sm text-gray-700">{provider.name}</span>
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        provider.status.available 
-                          ? 'bg-green-100 text-green-800' 
+                        provider.status.available
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
                         {provider.status.available ? 'Available' : 'Unavailable'}
@@ -226,7 +226,7 @@ export default function Home() {
             {messages.length === 0 ? (
               <div className="text-center text-gray-500">
                 <p>Welcome to PolarisAI! Start a conversation with the General Assistant.</p>
-                <p className="text-sm mt-2">Try asking: "How does the reasoning system work?" or "Help me brainstorm ideas for a project"</p>
+                <p className="text-sm mt-2">Try asking: &quot;How does the reasoning system work?&quot; or &quot;Help me brainstorm ideas for a project&quot;</p>
               </div>
             ) : (
               messages.map((message) => (

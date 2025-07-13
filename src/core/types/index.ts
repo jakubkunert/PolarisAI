@@ -5,7 +5,7 @@ export interface UserInput {
   content: string;
   timestamp: Date;
   type: 'text' | 'voice' | 'image';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AgentResponse {
@@ -15,7 +15,7 @@ export interface AgentResponse {
   timestamp: Date;
   type: 'text' | 'voice' | 'image' | 'action';
   confidence: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   reasoning?: string;
 }
 
@@ -36,22 +36,22 @@ export interface ModelProvider {
   generateResponse(prompt: string, config: ModelConfig): Promise<string>;
   streamResponse(prompt: string, config: ModelConfig): AsyncIterable<string>;
   isAvailable(): Promise<boolean>;
-  getStatus(): { authenticated: boolean; available: boolean; id: string; name: string; [key: string]: any };
+  getStatus(): { authenticated: boolean; available: boolean; id: string; name: string; [key: string]: unknown };
 }
 
 export interface Tool {
   id: string;
   name: string;
   description: string;
-  parameters: Record<string, any>;
-  execute(params: Record<string, any>): Promise<any>;
+  parameters: Record<string, unknown>;
+  execute(params: Record<string, unknown>): Promise<unknown>;
 }
 
 export interface Analysis {
   intent: string;
   confidence: number;
-  entities: Record<string, any>;
-  context: Record<string, any>;
+  entities: Record<string, unknown>;
+  context: Record<string, unknown>;
   previousConversation?: string[];
 }
 
@@ -65,14 +65,14 @@ export interface ActionPlan {
 export interface ActionStep {
   id: string;
   action: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   dependencies: string[];
   estimatedDuration: number;
 }
 
 export interface LearningUpdate {
-  patterns: Record<string, any>;
-  preferences: Record<string, any>;
+  patterns: Record<string, unknown>;
+  preferences: Record<string, unknown>;
   feedback: 'positive' | 'negative' | 'neutral';
   context: string;
 }
@@ -81,8 +81,8 @@ export interface LongTermMemory {
   userId: string;
   agentId: string;
   memories: Memory[];
-  patterns: Record<string, any>;
-  preferences: Record<string, any>;
+  patterns: Record<string, unknown>;
+  preferences: Record<string, unknown>;
 }
 
 export interface Memory {
@@ -106,18 +106,18 @@ export interface ReasoningAgent {
   description: string;
   capabilities: string[];
   systemPrompt: string;
-  
+
   // Core components
   planner: TaskPlanner;
   memory: LongTermMemory;
   tools: Tool[];
-  
+
   // Reasoning process
   analyze(input: UserInput): Promise<Analysis>;
   plan(analysis: Analysis): Promise<ActionPlan>;
   execute(plan: ActionPlan): Promise<AgentResponse>;
   reflect(response: AgentResponse): Promise<LearningUpdate>;
-  
+
   // Lifecycle
   initialize(): Promise<void>;
   cleanup(): Promise<void>;
@@ -133,7 +133,7 @@ export interface AgentConfig {
   capabilities: string[];
   tools: string[];
   isActive: boolean;
-  customSettings: Record<string, any>;
+  customSettings: Record<string, unknown>;
 }
 
 export interface UserProfile {
@@ -182,9 +182,9 @@ export interface ChatSession {
 export interface AgentOrchestrator {
   agents: Map<string, ReasoningAgent>;
   activeSession: ChatSession | null;
-  
+
   registerAgent(agent: ReasoningAgent): void;
   routeMessage(input: UserInput): Promise<AgentResponse>;
   coordinateAgents(task: string): Promise<AgentResponse[]>;
   getAgentStatus(agentId: string): Promise<'active' | 'inactive' | 'error'>;
-} 
+}

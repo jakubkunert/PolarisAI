@@ -1,10 +1,9 @@
-import { 
-  TaskPlanner, 
-  UserInput, 
-  Analysis, 
-  ActionPlan, 
-  AgentResponse, 
-  ActionStep,
+import {
+  TaskPlanner,
+  UserInput,
+  Analysis,
+  ActionPlan,
+  AgentResponse,
   ModelProvider,
   ModelConfig
 } from '../types';
@@ -14,7 +13,7 @@ export class BasicTaskPlanner implements TaskPlanner {
   private modelConfig: ModelConfig;
   private agentId: string;
   private systemPrompt: string;
-  
+
   constructor(
     modelProvider: ModelProvider,
     modelConfig: ModelConfig,
@@ -26,7 +25,7 @@ export class BasicTaskPlanner implements TaskPlanner {
     this.agentId = agentId;
     this.systemPrompt = systemPrompt;
   }
-  
+
   async analyzeTask(input: UserInput): Promise<Analysis> {
     const analysisPrompt = `
 ${this.systemPrompt}
@@ -58,7 +57,7 @@ Return only the JSON object, no additional text.
     try {
       const response = await this.modelProvider.generateResponse(analysisPrompt, this.modelConfig);
       const analysis = JSON.parse(response);
-      
+
       return {
         intent: analysis.intent || 'Unknown intent',
         confidence: analysis.confidence || 0.5,
@@ -68,7 +67,7 @@ Return only the JSON object, no additional text.
       };
     } catch (error) {
       console.error('Error analyzing task:', error);
-      
+
       // Fallback analysis
       return {
         intent: 'General assistance request',
@@ -79,7 +78,7 @@ Return only the JSON object, no additional text.
       };
     }
   }
-  
+
   async createPlan(analysis: Analysis): Promise<ActionPlan> {
     const planningPrompt = `
 ${this.systemPrompt}
@@ -116,7 +115,7 @@ Return only the JSON object, no additional text.
     try {
       const response = await this.modelProvider.generateResponse(planningPrompt, this.modelConfig);
       const plan = JSON.parse(response);
-      
+
       return {
         id: plan.id || `plan_${Date.now()}`,
         steps: plan.steps || [{
@@ -131,7 +130,7 @@ Return only the JSON object, no additional text.
       };
     } catch (error) {
       console.error('Error creating plan:', error);
-      
+
       // Fallback plan
       return {
         id: `fallback_plan_${Date.now()}`,
@@ -147,7 +146,7 @@ Return only the JSON object, no additional text.
       };
     }
   }
-  
+
   async executePlan(plan: ActionPlan): Promise<AgentResponse> {
     const executionPrompt = `
 ${this.systemPrompt}
@@ -164,7 +163,7 @@ ${plan.steps.map(step => `
 Estimated Duration: ${plan.estimatedDuration} minutes
 Requires Approval: ${plan.requiresApproval}
 
-Please execute this plan and provide a comprehensive, helpful response to the user. 
+Please execute this plan and provide a comprehensive, helpful response to the user.
 Include your reasoning process and be specific about what you're doing.
 
 If the plan requires approval, ask the user for confirmation before proceeding.
@@ -172,10 +171,10 @@ If the plan requires approval, ask the user for confirmation before proceeding.
 
     try {
       const response = await this.modelProvider.generateResponse(executionPrompt, this.modelConfig);
-      
+
       // Calculate confidence based on plan complexity and execution
       const confidence = this.calculateConfidence(plan, response);
-      
+
       return {
         id: `response_${Date.now()}`,
         agentId: this.agentId,
@@ -192,7 +191,7 @@ If the plan requires approval, ask the user for confirmation before proceeding.
       };
     } catch (error) {
       console.error('Error executing plan:', error);
-      
+
       // Fallback execution
       return {
         id: `error_response_${Date.now()}`,
@@ -206,33 +205,33 @@ If the plan requires approval, ask the user for confirmation before proceeding.
       };
     }
   }
-  
+
   private calculateConfidence(plan: ActionPlan, response: string): number {
     let confidence = 0.7; // Base confidence
-    
+
     // Adjust based on plan complexity
     if (plan.steps.length === 1) {
       confidence += 0.1; // Simple plans are more reliable
     } else if (plan.steps.length > 3) {
       confidence -= 0.1; // Complex plans have more uncertainty
     }
-    
+
     // Adjust based on response length (longer responses might indicate more thought)
     if (response.length > 500) {
       confidence += 0.1;
     } else if (response.length < 100) {
       confidence -= 0.1;
     }
-    
+
     // Adjust based on whether approval is required
     if (plan.requiresApproval) {
       confidence -= 0.1; // Less confident when approval is needed
     }
-    
+
     // Ensure confidence is within bounds
     return Math.max(0, Math.min(1, confidence));
   }
-  
+
   async streamExecution(plan: ActionPlan): Promise<AsyncIterable<string>> {
     const executionPrompt = `
 ${this.systemPrompt}
@@ -246,7 +245,7 @@ ${plan.steps.map(step => `
 - Parameters: ${JSON.stringify(step.parameters)}
 `).join('\n')}
 
-Please execute this plan and provide a comprehensive, helpful response to the user. 
+Please execute this plan and provide a comprehensive, helpful response to the user.
 Include your reasoning process and be specific about what you're doing.
 `;
 
@@ -254,11 +253,11 @@ Include your reasoning process and be specific about what you're doing.
       return this.modelProvider.streamResponse(executionPrompt, this.modelConfig);
     } catch (error) {
       console.error('Error streaming execution:', error);
-      
+
       // Return error as async iterable
       return (async function*() {
         yield `I apologize, but I encountered an error while processing your request: ${error instanceof Error ? error.message : 'Unknown error'}`;
       })();
     }
   }
-} 
+}

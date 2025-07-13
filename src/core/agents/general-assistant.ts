@@ -1,12 +1,12 @@
 import { BaseAgent } from './base-agent';
 import { BasicTaskPlanner } from './basic-planner';
-import { 
-  LongTermMemory, 
-  TaskPlanner, 
-  ModelProvider, 
+import {
+  LongTermMemory,
+  TaskPlanner,
+  ModelProvider,
   ModelConfig,
   UserInput,
-  AgentResponse 
+  AgentResponse
 } from '../types';
 
 export class GeneralAssistantAgent extends BaseAgent {
@@ -70,7 +70,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       modelConfig
     );
   }
-  
+
   createMemory(): LongTermMemory {
     return {
       userId: '', // Will be set when user context is available
@@ -90,7 +90,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       }
     };
   }
-  
+
   createPlanner(): TaskPlanner {
     return new BasicTaskPlanner(
       this.modelProvider,
@@ -99,7 +99,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       this.systemPrompt
     );
   }
-  
+
   protected async initializeTools(): Promise<void> {
     // Add general-purpose tools
     this.addTool({
@@ -116,7 +116,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         return await this.generateResponse(prompt);
       }
     });
-    
+
     this.addTool({
       id: 'brainstorming',
       name: 'Brainstorming',
@@ -131,7 +131,7 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
         return await this.generateResponse(prompt);
       }
     });
-    
+
     this.addTool({
       id: 'step-by-step',
       name: 'Step-by-Step Guide',
@@ -147,115 +147,115 @@ Remember: You're designed to be a reasoning agent that thinks through problems s
       }
     });
   }
-  
+
   protected async loadMemory(): Promise<void> {
     // Load user-specific patterns and preferences
     // In a real implementation, this would load from a database
     console.log(`Loading memory for general assistant ${this.id}`);
   }
-  
+
   async processSpecializedInput(input: UserInput): Promise<AgentResponse> {
     // Handle specialized input types or patterns
     const content = input.content.toLowerCase();
-    
+
     // Check for common patterns
     if (content.includes('brainstorm') || content.includes('ideas')) {
       return this.handleBrainstorming(input);
     }
-    
+
     if (content.includes('step by step') || content.includes('how to')) {
       return this.handleStepByStep(input);
     }
-    
+
     if (content.includes('analyze') || content.includes('analysis')) {
       return this.handleAnalysis(input);
     }
-    
+
     // Default to normal processing
     return this.processInput(input);
   }
-  
+
   private async handleBrainstorming(input: UserInput): Promise<AgentResponse> {
     const brainstormTool = this.getTool('brainstorming');
     if (!brainstormTool) {
       return this.processInput(input);
     }
-    
+
     try {
       const ideas = await brainstormTool.execute({
         topic: input.content,
         quantity: 5
       });
-      
+
       return {
         id: `brainstorm_${Date.now()}`,
         agentId: this.id,
-        content: ideas,
+        content: typeof ideas === 'string' ? ideas : String(ideas),
         timestamp: new Date(),
         type: 'text',
         confidence: 0.8,
         metadata: { tool: 'brainstorming', specialized: true },
         reasoning: 'Detected brainstorming request, used specialized brainstorming tool'
       };
-    } catch (error) {
+    } catch (_error) {
       return this.processInput(input);
     }
   }
-  
+
   private async handleStepByStep(input: UserInput): Promise<AgentResponse> {
     const stepTool = this.getTool('step-by-step');
     if (!stepTool) {
       return this.processInput(input);
     }
-    
+
     try {
       const guide = await stepTool.execute({
         task: input.content,
         difficulty: 'intermediate'
       });
-      
+
       return {
         id: `steps_${Date.now()}`,
         agentId: this.id,
-        content: guide,
+        content: typeof guide === 'string' ? guide : String(guide),
         timestamp: new Date(),
         type: 'text',
         confidence: 0.85,
         metadata: { tool: 'step-by-step', specialized: true },
         reasoning: 'Detected step-by-step request, used specialized planning tool'
       };
-    } catch (error) {
+    } catch (_error) {
       return this.processInput(input);
     }
   }
-  
+
   private async handleAnalysis(input: UserInput): Promise<AgentResponse> {
     const analysisTool = this.getTool('text-analysis');
     if (!analysisTool) {
       return this.processInput(input);
     }
-    
+
     try {
       const analysis = await analysisTool.execute({
         text: input.content,
         analysisType: 'summary'
       });
-      
+
       return {
         id: `analysis_${Date.now()}`,
         agentId: this.id,
-        content: analysis,
+        content: typeof analysis === 'string' ? analysis : String(analysis),
         timestamp: new Date(),
         type: 'text',
         confidence: 0.75,
         metadata: { tool: 'text-analysis', specialized: true },
         reasoning: 'Detected analysis request, used specialized analysis tool'
       };
-    } catch (error) {
+    } catch (_error) {
       return this.processInput(input);
     }
   }
-  
+
   async getCapabilitiesDescription(): Promise<string> {
     return `
 I'm your General Assistant, part of the Polaris AI system. Here's what I can help you with:
@@ -263,7 +263,7 @@ I'm your General Assistant, part of the Polaris AI system. Here's what I can hel
 **Core Capabilities:**
 • Answer questions and provide information
 • Help with problem-solving and analysis
-• Break down complex tasks into manageable steps  
+• Break down complex tasks into manageable steps
 • Generate creative ideas and brainstorm solutions
 • Assist with planning and organization
 • Provide explanations and reasoning
@@ -284,4 +284,4 @@ I'm your General Assistant, part of the Polaris AI system. Here's what I can hel
 Just ask me anything, and I'll do my best to help! I'm designed to be thoughtful, accurate, and genuinely useful.
 `;
   }
-} 
+}
