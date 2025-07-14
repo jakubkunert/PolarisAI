@@ -70,10 +70,10 @@ describe('OpenAIProvider', () => {
         choices: [
           {
             message: {
-              content: 'This is a test response'
-            }
-          }
-        ]
+              content: 'This is a test response',
+            },
+          },
+        ],
       };
       mockFetch(mockResponse);
 
@@ -86,7 +86,7 @@ describe('OpenAIProvider', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-api-key',
+            Authorization: 'Bearer test-api-key',
             'Content-Type': 'application/json',
           }),
         })
@@ -124,7 +124,7 @@ describe('OpenAIProvider', () => {
 
     it('should use correct model configuration', async () => {
       const mockResponse = {
-        choices: [{ message: { content: 'Response' } }]
+        choices: [{ message: { content: 'Response' } }],
       };
       mockFetch(mockResponse);
 
@@ -133,7 +133,7 @@ describe('OpenAIProvider', () => {
         maxTokens: 150,
         topP: 0.95,
         frequencyPenalty: 0.1,
-        presencePenalty: 0.2
+        presencePenalty: 0.2,
       });
 
       await provider.generateResponse('Test prompt', config);
@@ -158,25 +158,30 @@ describe('OpenAIProvider', () => {
         ok: true,
         body: {
           getReader: () => ({
-            read: jest.fn()
+            read: jest
+              .fn()
               .mockResolvedValueOnce({
                 done: false,
-                value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n')
+                value: new TextEncoder().encode(
+                  'data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n'
+                ),
               })
               .mockResolvedValueOnce({
                 done: false,
-                value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":" World"}}]}\n\n')
+                value: new TextEncoder().encode(
+                  'data: {"choices":[{"delta":{"content":" World"}}]}\n\n'
+                ),
               })
               .mockResolvedValueOnce({
                 done: false,
-                value: new TextEncoder().encode('data: [DONE]\n\n')
+                value: new TextEncoder().encode('data: [DONE]\n\n'),
               })
               .mockResolvedValueOnce({
                 done: true,
-                value: undefined
-              })
-          })
-        }
+                value: undefined,
+              }),
+          }),
+        },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(mockStreamResponse);
@@ -200,7 +205,7 @@ describe('OpenAIProvider', () => {
       const stream = provider.streamResponse('Test prompt', config);
 
       await expect(async () => {
-        for await (const chunk of stream) {
+        for await (const _chunk of stream) {
           // This should throw
         }
       }).rejects.toThrow('Streaming error');
@@ -224,7 +229,7 @@ describe('OpenAIProvider', () => {
         available: true,
         id: 'openai',
         name: 'OpenAI',
-        model: 'gpt-4'
+        model: 'gpt-4o',
       });
     });
 
@@ -239,7 +244,7 @@ describe('OpenAIProvider', () => {
         available: true,
         id: 'openai',
         name: 'OpenAI',
-        model: 'gpt-4'
+        model: 'gpt-4o',
       });
     });
   });
@@ -282,9 +287,9 @@ describe('OpenAIProvider', () => {
 
       const config = createMockModelConfig();
 
-      await expect(
-        provider.generateResponse('', config)
-      ).rejects.toThrow('Cannot read properties of undefined');
+      await expect(provider.generateResponse('', config)).rejects.toThrow(
+        'Cannot read properties of undefined'
+      );
     });
 
     it('should handle very long prompts', async () => {

@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelManager } from '@/core/models/model-manager';
 import { agentRegistry } from '@/core/agents/agent-registry';
-import { UserInput, ReasoningAgent } from '@/core/types';
+import { UserInput, ReasoningAgent, ModelProvider } from '@/core/types';
 import { BaseAgent } from '@/core/agents/base-agent';
 import { OllamaProvider } from '@/core/models/ollama-provider';
 import { OpenAIProvider } from '@/core/models/openai-provider';
+
+// Enhanced agent interface with provider metadata
+interface EnhancedAgent extends ReasoningAgent {
+  modelProvider?: ModelProvider;
+  selectedOllamaModel?: string;
+  selectedOpenAIModel?: string;
+}
 
 // Initialize the model manager
 const modelManager = new ModelManager();
@@ -42,71 +49,71 @@ async function initializeAgent(
   if (cachedAgent) {
     return cachedAgent;
   }
-    let provider;
+  let provider;
 
-    if (providerId) {
-      // Use specific provider
-      provider = modelManager.getProvider(providerId);
-      if (!provider) {
-        throw new Error(`Provider ${providerId} not found`);
-      }
-
-      // Authenticate if API key is provided
-      if (apiKey) {
-        const success = await modelManager.authenticateProvider(
-          providerId,
-          apiKey
-        );
-        if (!success) {
-          throw new Error(`Failed to authenticate with ${providerId}`);
-        }
-      }
-
-      // Set Ollama model if provided
-      if (providerId === 'ollama' && selectedOllamaModel) {
-        const ollamaProvider = provider as OllamaProvider;
-        ollamaProvider.setModel(selectedOllamaModel);
-      }
-
-      // Set OpenAI model if provided
-      if (providerId === 'openai' && selectedOpenAIModel) {
-        const openaiProvider = provider as OpenAIProvider;
-        openaiProvider.setModel(selectedOpenAIModel);
-      }
-    } else {
-      // Try to get an already authenticated provider
-      provider = await modelManager.getBestAvailableProvider();
-
-      if (!provider) {
-        // If no authenticated provider, get any available provider
-        const availableProviders = modelManager.getAvailableProviders();
-        if (availableProviders.length === 0) {
-          throw new Error('No model providers available');
-        }
-        provider = availableProviders[0]; // Use first available provider
-      }
+  if (providerId) {
+    // Use specific provider
+    provider = modelManager.getProvider(providerId);
+    if (!provider) {
+      throw new Error(`Provider ${providerId} not found`);
     }
 
-    // Check if provider is authenticated (for remote providers)
-    if (provider.type === 'remote' && !provider.getStatus().authenticated) {
-      throw new Error(
-        `Provider ${provider.id} requires authentication. Please provide an API key.`
+    // Authenticate if API key is provided
+    if (apiKey) {
+      const success = await modelManager.authenticateProvider(
+        providerId,
+        apiKey
       );
+      if (!success) {
+        throw new Error(`Failed to authenticate with ${providerId}`);
+      }
     }
 
-    const config = modelManager.getDefaultModelConfig();
-    const agent = await agentRegistry.getAgent(selectedAgentId, provider, config);
+    // Set Ollama model if provided
+    if (providerId === 'ollama' && selectedOllamaModel) {
+      const ollamaProvider = provider as OllamaProvider;
+      ollamaProvider.setModel(selectedOllamaModel);
+    }
 
-    // Store provider info with agent for later reference
-    (agent as any).modelProvider = provider;
-    (agent as any).modelConfig = config;
-    (agent as any).selectedOllamaModel = selectedOllamaModel;
-    (agent as any).selectedOpenAIModel = selectedOpenAIModel;
+    // Set OpenAI model if provided
+    if (providerId === 'openai' && selectedOpenAIModel) {
+      const openaiProvider = provider as OpenAIProvider;
+      openaiProvider.setModel(selectedOpenAIModel);
+    }
+  } else {
+    // Try to get an already authenticated provider
+    provider = await modelManager.getBestAvailableProvider();
 
-    // Cache the agent
-    agentCache.set(cacheKey, agent);
+    if (!provider) {
+      // If no authenticated provider, get any available provider
+      const availableProviders = modelManager.getAvailableProviders();
+      if (availableProviders.length === 0) {
+        throw new Error('No model providers available');
+      }
+      provider = availableProviders[0]; // Use first available provider
+    }
+  }
 
-    return agent;
+  // Check if provider is authenticated (for remote providers)
+  if (provider.type === 'remote' && !provider.getStatus().authenticated) {
+    throw new Error(
+      `Provider ${provider.id} requires authentication. Please provide an API key.`
+    );
+  }
+
+  const config = modelManager.getDefaultModelConfig();
+  const agent = await agentRegistry.getAgent(selectedAgentId, provider, config);
+
+  // Store provider info with agent for later reference
+  const enhancedAgent = agent as EnhancedAgent;
+  enhancedAgent.modelProvider = provider;
+  enhancedAgent.selectedOllamaModel = selectedOllamaModel;
+  enhancedAgent.selectedOpenAIModel = selectedOpenAIModel;
+
+  // Cache the agent
+  agentCache.set(cacheKey, agent);
+
+  return agent;
 }
 
 // Helper function to create streaming response
@@ -115,18 +122,21 @@ async function* streamAgentResponse(
   userInput: UserInput
 ): AsyncIterable<string> {
   try {
-        // Get the streaming response from the agent
+    // Get the streaming response from the agent
     const baseAgent = agent as BaseAgent;
     // For now, use fallback streaming if agent doesn't have streamUserInput
-    const stream = (baseAgent as any).streamUserInput ?
-      await (baseAgent as any).streamUserInput(userInput) :
-      await (baseAgent as any).streamResponse(userInput.content);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stream = (baseAgent as any).streamUserInput
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (baseAgent as any).streamUserInput(userInput)
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (baseAgent as any).streamResponse(userInput.content);
 
     // Track the full response for metadata
     let fullResponse = '';
 
-        // Yield the initial message metadata
-    const modelProvider = (agent as any).modelProvider;
+    // Yield the initial message metadata
+    const modelProvider = (agent as EnhancedAgent).modelProvider;
     let currentModel = 'Default';
 
     // Get the correct model name based on provider type
@@ -203,7 +213,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize the agent with provider and API key if provided
-    const agent = await initializeAgent(provider, apiKey, selectedOllamaModel, selectedOpenAIModel, agentId);
+    const agent = await initializeAgent(
+      provider,
+      apiKey,
+      selectedOllamaModel,
+      selectedOpenAIModel,
+      agentId
+    );
 
     // Create user input
     const userInput: UserInput = {
@@ -253,7 +269,7 @@ export async function POST(request: NextRequest) {
     const response = await baseAgent.processInput(userInput);
 
     // Get model information
-    const modelProvider = (agent as any).modelProvider;
+    const modelProvider = (agent as EnhancedAgent).modelProvider;
     let currentModel = 'Default';
 
     // Get the correct model name based on provider type
