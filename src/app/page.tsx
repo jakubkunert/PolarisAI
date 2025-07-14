@@ -27,6 +27,9 @@ interface ChatMessage {
   reasoning?: string;
   metadata?: Record<string, unknown>;
   isStreaming?: boolean;
+  // Add agent identification
+  agentId?: string;
+  agentName?: string;
 }
 
 interface AgentStatus {
@@ -281,6 +284,8 @@ export default function Home() {
       timestamp: new Date(),
       isStreaming: true,
       confidence: 0.9,
+      agentId: undefined, // Will be updated when agent info is received
+      agentName: undefined,
     };
 
     setMessages(prev => [...prev, streamingMessage]);
@@ -326,7 +331,23 @@ export default function Home() {
               try {
                 const data = JSON.parse(line);
 
-                if (data.type === 'content' && data.content) {
+                if (data.type === 'start') {
+                  // Update agent info when stream starts
+                  setMessages(prev =>
+                    prev.map(msg =>
+                      msg.id === streamingMessage.id
+                        ? {
+                            ...msg,
+                            agentId: data.agentId,
+                            agentName:
+                              data.agentName ||
+                              agentStatus?.name ||
+                              'Assistant',
+                          }
+                        : msg
+                    )
+                  );
+                } else if (data.type === 'content' && data.content) {
                   setMessages(prev =>
                     prev.map(msg =>
                       msg.id === streamingMessage.id
@@ -366,6 +387,7 @@ export default function Home() {
         type: 'agent',
         timestamp: new Date(),
         confidence: 0,
+        agentName: agentStatus?.name || 'Assistant',
       };
       setMessages(prev =>
         prev.filter(msg => msg.id !== streamingMessage.id).concat(errorMessage)
@@ -402,6 +424,8 @@ export default function Home() {
           confidence: data.response.confidence,
           reasoning: data.response.reasoning,
           metadata: data.response.metadata,
+          agentId: data.agent.id,
+          agentName: data.agent.name,
         };
 
         setMessages(prev => [...prev, agentMessage]);
@@ -413,6 +437,7 @@ export default function Home() {
           type: 'agent',
           timestamp: new Date(),
           confidence: 0,
+          agentName: 'System',
         };
         setMessages(prev => [...prev, errorMessage]);
       }
@@ -423,6 +448,7 @@ export default function Home() {
         type: 'agent',
         timestamp: new Date(),
         confidence: 0,
+        agentName: 'System',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -718,6 +744,12 @@ export default function Home() {
                         {message.type === 'agent' && (
                           <div className="mt-2 space-y-2">
                             <div className="flex flex-wrap gap-2">
+                              {/* Agent identification badge */}
+                              {message.agentName && (
+                                <Badge variant="default" size="sm">
+                                  🤖 {message.agentName}
+                                </Badge>
+                              )}
                               {message.isStreaming && (
                                 <Badge variant="outline" size="sm">
                                   <span className="flex items-center gap-1">

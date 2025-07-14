@@ -1,0 +1,160 @@
+name: Project Automation
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  auto-assign-to-project:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Add issue to project
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/users/jakubkunert/projects/1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-label-issues:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Auto-label TODO issues
+        if: contains(github.event.issue.title, '[TODO]')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['todo', 'enhancement']
+            });
+
+      - name: Auto-label by content
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            const labels = [];
+
+            // Agent-related
+            if (issueBody.includes('🤖 **Enhanced Agent Capabilities**')) {
+              labels.push('agents');
+            }
+
+            // Model-related
+            if (issueBody.includes('🔗 **Extended Model Support**')) {
+              labels.push('models');
+            }
+
+            // UI/UX
+            if (issueBody.includes('🎨 **User Experience**')) {
+              labels.push('ui/ux');
+            }
+
+            // Enterprise
+            if (issueBody.includes('🏢 **Enterprise Features**')) {
+              labels.push('enterprise');
+            }
+
+            // Infrastructure
+            if (issueBody.includes('🛠️ **Infrastructure**')) {
+              labels.push('infrastructure');
+            }
+
+            // Documentation
+            if (issueBody.includes('📚 **Documentation**')) {
+              labels.push('documentation');
+            }
+
+            // Testing
+            if (issueBody.includes('🧪 **Testing**')) {
+              labels.push('testing');
+            }
+
+            // Priority labels
+            if (issueBody.includes('🔥 Critical')) {
+              labels.push('priority: critical');
+            } else if (issueBody.includes('🔶 High')) {
+              labels.push('priority: high');
+            } else if (issueBody.includes('🔵 Medium')) {
+              labels.push('priority: medium');
+            } else if (issueBody.includes('🟢 Low')) {
+              labels.push('priority: low');
+            }
+
+            // Effort labels
+            if (issueBody.includes('🟢 Small')) {
+              labels.push('effort: small');
+            } else if (issueBody.includes('🔵 Medium')) {
+              labels.push('effort: medium');
+            } else if (issueBody.includes('🔶 Large')) {
+              labels.push('effort: large');
+            } else if (issueBody.includes('🔴 Extra Large')) {
+              labels.push('effort: xl');
+            }
+
+            if (labels.length > 0) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labels
+              });
+            }
+
+  update-project-status:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.issue.state_reason == 'completed'
+
+    steps:
+      - name: Move to Done
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // This would require GitHub Projects API v2
+            // For now, this is a placeholder for future implementation
+            console.log('Issue completed:', context.issue.number);
+
+  create-roadmap-issues:
+    runs-on: ubuntu-latest
+    # Only run when manually triggered
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Create roadmap issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const roadmapItems = [
+              {
+                title: '[TODO] Specialized agents for different domains',
+                body: '## Task Description\nDevelop specialized AI agents for different domains (e.g., code analysis, data science, creative writing).\n\n## Priority\n- [x] 🔶 High - Important for next release\n\n## Category\n- [x] 🤖 **Enhanced Agent Capabilities**\n\n## Acceptance Criteria\n- [ ] Research domain-specific agent requirements\n- [ ] Design agent specialization architecture\n- [ ] Implement at least 2 specialized agents\n- [ ] Add agent switching capability to UI\n- [ ] Write documentation for new agents\n\n## Effort Estimate\n- [x] 🔶 Large (3-7 days)',
+                labels: ['todo', 'enhancement', 'agents', 'priority: high']
+              },
+              {
+                title: '[TODO] Anthropic Claude integration',
+                body: '## Task Description\nAdd support for Anthropic Claude models as an additional provider option.\n\n## Priority\n- [x] 🔵 Medium - Standard priority\n\n## Category\n- [x] 🔗 **Extended Model Support**\n\n## Acceptance Criteria\n- [ ] Create ClaudeProvider class\n- [ ] Add authentication flow\n- [ ] Update UI to support Claude selection\n- [ ] Add configuration options\n- [ ] Write tests for Claude integration\n\n## Effort Estimate\n- [x] 🔵 Medium (1-3 days)',
+                labels: ['todo', 'enhancement', 'models', 'priority: medium']
+              },
+              {
+                title: '[TODO] Voice interaction support',
+                body: '## Task Description\nAdd voice input and output capabilities for hands-free interaction.\n\n## Priority\n- [x] 🔵 Medium - Standard priority\n\n## Category\n- [x] 🎨 **User Experience**\n\n## Acceptance Criteria\n- [ ] Implement speech-to-text input\n- [ ] Add text-to-speech output\n- [ ] Create voice control UI\n- [ ] Add voice settings configuration\n- [ ] Test cross-browser compatibility\n\n## Effort Estimate\n- [x] 🔶 Large (3-7 days)',
+                labels: ['todo', 'enhancement', 'ui/ux', 'priority: medium']
+              }
+            ];
+
+            for (const item of roadmapItems) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: item.title,
+                body: item.body,
+                labels: item.labels
+              });
+            }

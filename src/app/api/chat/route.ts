@@ -100,6 +100,7 @@ async function* streamAgentResponse(
       type: 'start',
       id: `response_${Date.now()}`,
       agentId: agent.id,
+      agentName: agent.name,
       timestamp: new Date().toISOString(),
     }) + '\n';
 
