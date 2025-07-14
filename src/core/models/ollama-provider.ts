@@ -294,4 +294,8 @@ export class OllamaProvider extends BaseModelProvider {
   setModel(modelName: string): void {
     this.defaultModel = modelName;
   }
+
+  getCurrentModel(): string {
+    return this.defaultModel;
+  }
 }

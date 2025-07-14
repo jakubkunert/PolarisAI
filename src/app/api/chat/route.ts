@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelManager } from '@/core/models/model-manager';
-import { GeneralAssistantAgent } from '@/core/agents/general-assistant';
-import { UserInput } from '@/core/types';
+import { agentRegistry } from '@/core/agents/agent-registry';
+import { UserInput, ReasoningAgent } from '@/core/types';
+import { BaseAgent } from '@/core/agents/base-agent';
 import { OllamaProvider } from '@/core/models/ollama-provider';
+import { OpenAIProvider } from '@/core/models/openai-provider';
 
 // Initialize the model manager
 const modelManager = new ModelManager();
@@ -16,19 +18,30 @@ async function ensureInitialized() {
   }
 }
 
-let generalAgent: GeneralAssistantAgent | null = null;
+// Cache for initialized agents
+const agentCache = new Map<string, ReasoningAgent>();
 
 async function initializeAgent(
   providerId?: string,
   apiKey?: string,
-  selectedOllamaModel?: string
+  selectedOllamaModel?: string,
+  selectedOpenAIModel?: string,
+  agentId?: string
 ) {
-  // Reset agent if we're switching providers
-  if (generalAgent && providerId) {
-    generalAgent = null;
+  const selectedAgentId = agentId || agentRegistry.getDefaultAgentId();
+  const cacheKey = `${selectedAgentId}-${providerId || 'default'}`;
+
+  // Reset cache if we're switching providers
+  if (providerId) {
+    agentCache.clear();
+    agentRegistry.clearAgents();
   }
 
-  if (!generalAgent) {
+  // Check if we have a cached agent
+  const cachedAgent = agentCache.get(cacheKey);
+  if (cachedAgent) {
+    return cachedAgent;
+  }
     let provider;
 
     if (providerId) {
@@ -54,6 +67,12 @@ async function initializeAgent(
         const ollamaProvider = provider as OllamaProvider;
         ollamaProvider.setModel(selectedOllamaModel);
       }
+
+      // Set OpenAI model if provided
+      if (providerId === 'openai' && selectedOpenAIModel) {
+        const openaiProvider = provider as OpenAIProvider;
+        openaiProvider.setModel(selectedOpenAIModel);
+      }
     } else {
       // Try to get an already authenticated provider
       provider = await modelManager.getBestAvailableProvider();
@@ -76,31 +95,60 @@ async function initializeAgent(
     }
 
     const config = modelManager.getDefaultModelConfig();
-    generalAgent = new GeneralAssistantAgent(provider, config);
-    await generalAgent.initialize();
-  }
+    const agent = await agentRegistry.getAgent(selectedAgentId, provider, config);
 
-  return generalAgent;
+    // Store provider info with agent for later reference
+    (agent as any).modelProvider = provider;
+    (agent as any).modelConfig = config;
+    (agent as any).selectedOllamaModel = selectedOllamaModel;
+    (agent as any).selectedOpenAIModel = selectedOpenAIModel;
+
+    // Cache the agent
+    agentCache.set(cacheKey, agent);
+
+    return agent;
 }
 
 // Helper function to create streaming response
 async function* streamAgentResponse(
-  agent: GeneralAssistantAgent,
+  agent: ReasoningAgent,
   userInput: UserInput
 ): AsyncIterable<string> {
   try {
-    // Get the streaming response from the agent
-    const stream = await agent.streamUserInput(userInput);
+        // Get the streaming response from the agent
+    const baseAgent = agent as BaseAgent;
+    // For now, use fallback streaming if agent doesn't have streamUserInput
+    const stream = (baseAgent as any).streamUserInput ?
+      await (baseAgent as any).streamUserInput(userInput) :
+      await (baseAgent as any).streamResponse(userInput.content);
 
     // Track the full response for metadata
     let fullResponse = '';
 
-    // Yield the initial message metadata
+        // Yield the initial message metadata
+    const modelProvider = (agent as any).modelProvider;
+    let currentModel = 'Default';
+
+    // Get the correct model name based on provider type
+    if (modelProvider) {
+      if (modelProvider.id === 'ollama') {
+        const ollamaProvider = modelProvider as OllamaProvider;
+        currentModel = ollamaProvider.getCurrentModel();
+      } else if (modelProvider.id === 'openai') {
+        const openaiProvider = modelProvider as OpenAIProvider;
+        currentModel = openaiProvider.getCurrentModel();
+      } else {
+        currentModel = modelProvider.id || 'Default';
+      }
+    }
+
     yield JSON.stringify({
       type: 'start',
       id: `response_${Date.now()}`,
       agentId: agent.id,
       agentName: agent.name,
+      modelProvider: modelProvider?.name || 'Unknown',
+      modelName: currentModel,
       timestamp: new Date().toISOString(),
     }) + '\n';
 
@@ -142,6 +190,8 @@ export async function POST(request: NextRequest) {
       provider,
       apiKey,
       selectedOllamaModel,
+      selectedOpenAIModel,
+      agentId,
       stream = false,
     } = body;
 
@@ -153,7 +203,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize the agent with provider and API key if provided
-    const agent = await initializeAgent(provider, apiKey, selectedOllamaModel);
+    const agent = await initializeAgent(provider, apiKey, selectedOllamaModel, selectedOpenAIModel, agentId);
 
     // Create user input
     const userInput: UserInput = {
@@ -199,7 +249,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle regular response
-    const response = await agent.processInput(userInput);
+    const baseAgent = agent as BaseAgent;
+    const response = await baseAgent.processInput(userInput);
+
+    // Get model information
+    const modelProvider = (agent as any).modelProvider;
+    let currentModel = 'Default';
+
+    // Get the correct model name based on provider type
+    if (modelProvider) {
+      if (modelProvider.id === 'ollama') {
+        const ollamaProvider = modelProvider as OllamaProvider;
+        currentModel = ollamaProvider.getCurrentModel();
+      } else if (modelProvider.id === 'openai') {
+        const openaiProvider = modelProvider as OpenAIProvider;
+        currentModel = openaiProvider.getCurrentModel();
+      } else {
+        currentModel = modelProvider.id || 'Default';
+      }
+    }
 
     // Return the response
     return NextResponse.json({
@@ -215,7 +283,12 @@ export async function POST(request: NextRequest) {
       agent: {
         id: agent.id,
         name: agent.name,
-        status: agent.getStatus(),
+        status: baseAgent.getStatus(),
+      },
+      model: {
+        provider: modelProvider?.name || 'Unknown',
+        name: currentModel,
+        type: modelProvider?.type || 'unknown',
       },
     });
   } catch (error) {
@@ -244,27 +317,27 @@ export async function GET(_request: NextRequest) {
       status: p.getStatus(),
     }));
 
-    // Try to get agent status if possible, but don't fail if it's not available
+    // Get available agents from registry
+    const availableAgents = agentRegistry.getAvailableAgents();
+
+    // Try to get current agent status if any agents are active
     let agentStatus = null;
-    try {
-      if (generalAgent) {
-        const status = generalAgent.getStatus();
-        agentStatus = {
-          id: status.id,
-          name: status.name,
-          initialized: status.initialized,
-          capabilities: status.capabilities,
-          memoryCount: status.memoryCount,
-        };
-      }
-    } catch (agentError) {
-      // Agent not available, that's okay for status endpoint
-      console.log('Agent not available for status check:', agentError);
+    const activeAgentIds = agentRegistry.getActiveAgentIds();
+    if (activeAgentIds.length > 0) {
+      // For now, just return info about available agents
+      agentStatus = {
+        id: 'multiple',
+        name: 'Agent Registry',
+        initialized: true,
+        capabilities: availableAgents.flatMap(a => a.capabilities).slice(0, 5),
+        memoryCount: 0,
+      };
     }
 
     return NextResponse.json({
       success: true,
       providers: availableProviders,
+      agents: availableAgents,
       agent: agentStatus,
     });
   } catch (error) {
@@ -299,6 +372,22 @@ export async function PUT(request: NextRequest) {
       const models = await (
         ollamaProvider as OllamaProvider
       ).getAvailableModels();
+      return NextResponse.json({
+        success: true,
+        models,
+      });
+    }
+
+    if (action === 'get-openai-models') {
+      const openaiProvider = modelManager.getProvider('openai');
+      if (!openaiProvider || openaiProvider.id !== 'openai') {
+        return NextResponse.json(
+          { error: 'OpenAI provider not found' },
+          { status: 404 }
+        );
+      }
+
+      const models = (openaiProvider as OpenAIProvider).getAvailableModels();
       return NextResponse.json({
         success: true,
         models,

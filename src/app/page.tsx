@@ -30,6 +30,9 @@ interface ChatMessage {
   // Add agent identification
   agentId?: string;
   agentName?: string;
+  // Add model identification
+  modelProvider?: string;
+  modelName?: string;
 }
 
 interface AgentStatus {
@@ -45,6 +48,15 @@ interface Provider {
   name: string;
   type: 'local' | 'remote';
   status: Record<string, unknown>;
+}
+
+interface AgentInfo {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: string[];
+  category: string;
+  icon: string;
 }
 
 // Icon components
@@ -124,8 +136,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
+  const [availableAgents, setAvailableAgents] = useState<AgentInfo[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<string>('general-assistant');
   const [showSettings, setShowSettings] = useState(false);
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [openaiModels, setOpenaiModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
 
   // Track if models have been fetched for current session
@@ -144,24 +159,25 @@ export default function Home() {
 
   useEffect(() => {
     fetchStatus();
+    fetchAvailableAgents();
   }, []);
 
-  const fetchOllamaModels = useCallback(async () => {
+  const fetchOllamaModels = useCallback(async (force = false) => {
     // Use current values from the closure
     const currentProvider = config.selectedProvider;
     const currentModel = config.selectedOllamaModel;
 
-    if (currentProvider !== 'ollama') return;
+    if (!force && currentProvider !== 'ollama') return;
 
-    // Skip if already fetched and models exist
-    if (modelsFetchedRef.current && ollamaModels.length > 0) {
+    // Skip if already fetched and models exist, unless forced
+    if (!force && modelsFetchedRef.current && ollamaModels.length > 0) {
       console.log('⏭️ Skipping Ollama models fetch - already have models');
       return;
     }
 
-    // Prevent rapid successive calls (debounce for 2 seconds)
+    // Prevent rapid successive calls (debounce for 2 seconds), unless forced
     const now = Date.now();
-    if (now - lastFetchTimeRef.current < 2000) {
+    if (!force && now - lastFetchTimeRef.current < 2000) {
       console.log(
         '⏭️ Skipping Ollama models fetch - too soon since last fetch'
       );
@@ -178,7 +194,7 @@ export default function Home() {
       });
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.models && data.models.length > 0) {
         setOllamaModels(data.models);
         modelsFetchedRef.current = true;
         console.log('✅ Ollama models fetched successfully:', data.models);
@@ -187,9 +203,15 @@ export default function Home() {
         if (!currentModel && data.models.length > 0) {
           updateConfig({ selectedOllamaModel: data.models[0] });
         }
+      } else {
+        console.warn('⚠️ No Ollama models found or API returned no data');
+        setOllamaModels([]);
+        modelsFetchedRef.current = false;
       }
     } catch (error) {
       console.error('❌ Failed to fetch Ollama models:', error);
+      setOllamaModels([]);
+      modelsFetchedRef.current = false;
     } finally {
       setLoadingModels(false);
     }
@@ -200,19 +222,75 @@ export default function Home() {
     ollamaModels.length,
   ]);
 
+  const fetchOpenAIModels = useCallback(async (force = false) => {
+    const currentProvider = config.selectedProvider;
+
+    if (!force && currentProvider !== 'openai') return;
+
+    // Skip if already fetched and models exist, unless forced
+    if (!force && openaiModels.length > 0) {
+      console.log('⏭️ Skipping OpenAI models fetch - already have models');
+      return;
+    }
+
+    console.log('🔄 Fetching OpenAI models...');
+
+    setLoadingModels(true);
+    try {
+      const response = await fetch('/api/chat?action=get-openai-models', {
+        method: 'PUT',
+      });
+      const data = await response.json();
+
+      if (data.success && data.models && data.models.length > 0) {
+        setOpenaiModels(data.models);
+        console.log('✅ OpenAI models fetched successfully:', data.models);
+
+        // If no model is selected but models are available, select the first one
+        if (!config.selectedOpenAIModel && data.models.length > 0) {
+          updateConfig({ selectedOpenAIModel: data.models[0] });
+        }
+      } else {
+        console.warn('⚠️ No OpenAI models found or API returned no data');
+        setOpenaiModels([]);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch OpenAI models:', error);
+      setOpenaiModels([]);
+    } finally {
+      setLoadingModels(false);
+    }
+  }, [
+    config.selectedProvider,
+    config.selectedOpenAIModel,
+    updateConfig,
+    openaiModels.length,
+  ]);
+
   const handleSettingsToggle = useCallback(() => {
     const newShowSettings = !showSettings;
     console.log('🔧 Settings toggled:', newShowSettings ? 'OPEN' : 'CLOSE');
     setShowSettings(newShowSettings);
 
-    // Only fetch Ollama models when opening settings and Ollama is selected
-    if (newShowSettings && config.selectedProvider === 'ollama') {
-      console.log(
-        '🔄 Fetching Ollama models because settings opened with Ollama selected'
-      );
-      fetchOllamaModels();
+    // Fetch models when opening settings based on selected provider
+    if (newShowSettings) {
+      if (config.selectedProvider === 'ollama') {
+        console.log(
+          '🔄 Fetching Ollama models because settings opened with Ollama selected'
+        );
+        // Force refresh if we should have models but don't
+        const forceRefresh = ollamaModels.length === 0 && !!config.selectedOllamaModel;
+        fetchOllamaModels(forceRefresh);
+      } else if (config.selectedProvider === 'openai') {
+        console.log(
+          '🔄 Fetching OpenAI models because settings opened with OpenAI selected'
+        );
+        // Force refresh if we should have models but don't
+        const forceRefresh = openaiModels.length === 0 && !!config.selectedOpenAIModel;
+        fetchOpenAIModels(forceRefresh);
+      }
     }
-  }, [showSettings, config.selectedProvider, fetchOllamaModels]);
+  }, [showSettings, config.selectedProvider, config.selectedOllamaModel, config.selectedOpenAIModel, ollamaModels.length, openaiModels.length, fetchOllamaModels, fetchOpenAIModels]);
 
   const handleProviderChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -224,20 +302,28 @@ export default function Home() {
       modelsFetchedRef.current = false;
       lastFetchTimeRef.current = 0;
 
-      // Clear models when switching away from ollama
+      // Clear models when switching away from provider
       if (selectedProvider !== 'ollama') {
         setOllamaModels([]);
       }
+      if (selectedProvider !== 'openai') {
+        setOpenaiModels([]);
+      }
 
-      // Fetch Ollama models when user selects Ollama
+      // Fetch models based on selected provider
       if (selectedProvider === 'ollama') {
         console.log(
           '🔄 Fetching Ollama models because provider changed to Ollama'
         );
-        fetchOllamaModels();
+        fetchOllamaModels(true); // Force fetch when provider changes
+      } else if (selectedProvider === 'openai') {
+        console.log(
+          '🔄 Fetching OpenAI models because provider changed to OpenAI'
+        );
+        fetchOpenAIModels(true); // Force fetch when provider changes
       }
     },
-    [updateConfig, fetchOllamaModels]
+    [updateConfig, fetchOllamaModels, fetchOpenAIModels]
   );
 
   const fetchStatus = async () => {
@@ -254,8 +340,71 @@ export default function Home() {
     }
   };
 
+  const fetchAvailableAgents = async () => {
+    try {
+      const response = await fetch('/api/chat');
+      const data = await response.json();
+
+      if (data.success && data.agents) {
+        setAvailableAgents(data.agents);
+      } else {
+        // Fallback to hardcoded agents if API doesn't return them
+        const agents: AgentInfo[] = [
+          {
+            id: 'general-assistant',
+            name: 'General Assistant',
+            description: 'Versatile AI assistant for general tasks, questions, and conversations',
+            capabilities: [
+              'question-answering',
+              'task-planning',
+              'creative-writing',
+              'analysis',
+              'brainstorming',
+              'step-by-step-guides'
+            ],
+            category: 'General',
+            icon: '🤖'
+          },
+          {
+            id: 'nutrition-agent',
+            name: 'Dr. Nutri',
+            description: 'Specialized nutrition expert for meal planning and dietary guidance',
+            capabilities: [
+              'meal-planning',
+              'nutrition-analysis',
+              'macro-calculation',
+              'weight-management',
+              'sports-nutrition',
+              'dietary-restrictions',
+              'recipe-suggestions',
+              'shopping-lists'
+            ],
+            category: 'Health & Wellness',
+            icon: '🥗'
+          }
+        ];
+        setAvailableAgents(agents);
+      }
+    } catch (error) {
+      console.error('Failed to fetch agents:', error);
+      // Use fallback agents on error
+      setAvailableAgents([
+        {
+          id: 'general-assistant',
+          name: 'General Assistant',
+          description: 'Versatile AI assistant for general tasks, questions, and conversations',
+          capabilities: ['question-answering', 'task-planning'],
+          category: 'General',
+          icon: '🤖'
+        }
+      ]);
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    console.log('📤 Sending message with agent:', selectedAgent);
 
     const userMessage: ChatMessage = {
       id: `user_${Date.now()}`,
@@ -301,6 +450,8 @@ export default function Home() {
           provider: config.selectedProvider || undefined,
           apiKey: config.apiKey || undefined,
           selectedOllamaModel: config.selectedOllamaModel || undefined,
+          selectedOpenAIModel: config.selectedOpenAIModel || undefined,
+          agentId: selectedAgent,
           stream: true,
         }),
       });
@@ -332,7 +483,7 @@ export default function Home() {
                 const data = JSON.parse(line);
 
                 if (data.type === 'start') {
-                  // Update agent info when stream starts
+                  // Update agent and model info when stream starts
                   setMessages(prev =>
                     prev.map(msg =>
                       msg.id === streamingMessage.id
@@ -343,6 +494,8 @@ export default function Home() {
                               data.agentName ||
                               agentStatus?.name ||
                               'Assistant',
+                            modelProvider: data.modelProvider,
+                            modelName: data.modelName,
                           }
                         : msg
                     )
@@ -388,6 +541,10 @@ export default function Home() {
         timestamp: new Date(),
         confidence: 0,
         agentName: agentStatus?.name || 'Assistant',
+        modelProvider: config.selectedProvider ?
+          providers.find(p => p.id === config.selectedProvider)?.name || config.selectedProvider
+          : 'Unknown',
+        modelName: config.selectedOllamaModel || 'Default',
       };
       setMessages(prev =>
         prev.filter(msg => msg.id !== streamingMessage.id).concat(errorMessage)
@@ -409,6 +566,8 @@ export default function Home() {
           provider: config.selectedProvider || undefined,
           apiKey: config.apiKey || undefined,
           selectedOllamaModel: config.selectedOllamaModel || undefined,
+          selectedOpenAIModel: config.selectedOpenAIModel || undefined,
+          agentId: selectedAgent,
           stream: false,
         }),
       });
@@ -426,6 +585,8 @@ export default function Home() {
           metadata: data.response.metadata,
           agentId: data.agent.id,
           agentName: data.agent.name,
+          modelProvider: data.model?.provider,
+          modelName: data.model?.name,
         };
 
         setMessages(prev => [...prev, agentMessage]);
@@ -438,6 +599,8 @@ export default function Home() {
           timestamp: new Date(),
           confidence: 0,
           agentName: 'System',
+          modelProvider: 'System',
+          modelName: 'Error',
         };
         setMessages(prev => [...prev, errorMessage]);
       }
@@ -449,6 +612,8 @@ export default function Home() {
         timestamp: new Date(),
         confidence: 0,
         agentName: 'System',
+        modelProvider: 'System',
+        modelName: 'Error',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -514,6 +679,22 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <Select
+                  label="AI Agent"
+                  value={selectedAgent}
+                  onChange={e => {
+                    console.log('🤖 Agent selection changed to:', e.target.value);
+                    setSelectedAgent(e.target.value);
+                  }}
+                  placeholder="Select an agent"
+                >
+                  {availableAgents.map(agent => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.icon} {agent.name}
+                    </option>
+                  ))}
+                </Select>
+
+                <Select
                   label="Model Provider"
                   value={config.selectedProvider}
                   onChange={handleProviderChange}
@@ -524,18 +705,53 @@ export default function Home() {
                       {provider.name} ({provider.type})
                     </option>
                   ))}
-                </Select>
+                                  </Select>
 
-                {config.selectedProvider === 'openai' && (
-                  <Input
-                    type="password"
-                    label="OpenAI API Key"
-                    value={config.apiKey}
-                    onChange={e => updateConfig({ apiKey: e.target.value })}
-                    placeholder="sk-..."
-                    helpText="Your API key is stored locally and never sent to our servers"
-                  />
+                {/* Selected Agent Info */}
+                {selectedAgent && availableAgents.length > 0 && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                    <h3 className="mb-2 font-medium text-blue-800">
+                      Selected Agent
+                    </h3>
+                    {(() => {
+                      const agent = availableAgents.find(a => a.id === selectedAgent);
+                      if (!agent) return null;
+                      return (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{agent.icon}</span>
+                            <span className="font-medium text-blue-900">
+                              {agent.name}
+                            </span>
+                            <Badge variant="outline" size="sm">
+                              {agent.category}
+                            </Badge>
+                          </div>
+                          <p className="text-blue-700">{agent.description}</p>
+                          <div className="mt-2">
+                            <span className="text-xs font-medium text-blue-600">
+                              Capabilities:
+                            </span>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {agent.capabilities.slice(0, 4).map(cap => (
+                                <Badge key={cap} variant="outline" size="sm">
+                                  {cap}
+                                </Badge>
+                              ))}
+                              {agent.capabilities.length > 4 && (
+                                <Badge variant="outline" size="sm">
+                                  +{agent.capabilities.length - 4} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 )}
+
+
 
                 {config.selectedProvider === 'ollama' && (
                   <Select
@@ -560,6 +776,80 @@ export default function Home() {
                       </option>
                     ))}
                   </Select>
+                )}
+
+                {config.selectedProvider === 'openai' && (
+                  <div className="space-y-4">
+                    <Select
+                      label="OpenAI Model"
+                      value={config.selectedOpenAIModel}
+                      onChange={e =>
+                        updateConfig({ selectedOpenAIModel: e.target.value })
+                      }
+                      placeholder="Select a model"
+                      disabled={loadingModels || openaiModels.length === 0}
+                      helpText={
+                        openaiModels.length === 0
+                          ? 'Loading available models...'
+                          : `${openaiModels.length} model(s) available`
+                      }
+                    >
+                      {openaiModels.map(model => (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
+                      ))}
+                    </Select>
+
+                    <Input
+                      type="password"
+                      label="OpenAI API Key"
+                      value={config.apiKey}
+                      onChange={e => updateConfig({ apiKey: e.target.value })}
+                      placeholder="sk-..."
+                      helpText="Your API key is stored locally and never sent to our servers"
+                    />
+                  </div>
+                )}
+
+                {/* Current Model Status */}
+                {config.selectedProvider && (
+                  <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+                    <h3 className="mb-2 font-medium text-green-800">
+                      Current Model
+                    </h3>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600">Provider:</span>
+                        <Badge variant="outline" size="sm">
+                          {providers.find(p => p.id === config.selectedProvider)?.name || config.selectedProvider}
+                        </Badge>
+                        <Badge variant={
+                          providers.find(p => p.id === config.selectedProvider)?.type === 'local'
+                            ? 'default'
+                            : 'secondary'
+                        } size="sm">
+                          {providers.find(p => p.id === config.selectedProvider)?.type || 'unknown'}
+                        </Badge>
+                      </div>
+                      {config.selectedProvider === 'ollama' && config.selectedOllamaModel && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600">Model:</span>
+                          <Badge variant="default" size="sm">
+                            ⚡ {config.selectedOllamaModel}
+                          </Badge>
+                        </div>
+                      )}
+                      {config.selectedProvider === 'openai' && config.selectedOpenAIModel && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600">Model:</span>
+                          <Badge variant="default" size="sm">
+                            ⚡ {config.selectedOpenAIModel}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 <div className="pt-4">
@@ -720,7 +1010,18 @@ export default function Home() {
                             : 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {message.type === 'user' ? <UserIcon /> : <BotIcon />}
+                        {message.type === 'user' ? (
+                          <UserIcon />
+                        ) : (
+                          <span className="text-lg">
+                            {(() => {
+                              const agent = availableAgents.find(a =>
+                                a.name === message.agentName || a.id === message.agentId
+                              );
+                              return agent?.icon || '🤖';
+                            })()}
+                          </span>
+                        )}
                       </div>
 
                       {/* Message */}
@@ -747,7 +1048,18 @@ export default function Home() {
                               {/* Agent identification badge */}
                               {message.agentName && (
                                 <Badge variant="default" size="sm">
-                                  🤖 {message.agentName}
+                                  {(() => {
+                                    const agent = availableAgents.find(a =>
+                                      a.name === message.agentName || a.id === message.agentId
+                                    );
+                                    return agent?.icon || '🤖';
+                                  })()} {message.agentName}
+                                </Badge>
+                              )}
+                              {/* Model identification badge */}
+                              {message.modelProvider && message.modelName && (
+                                <Badge variant="secondary" size="sm">
+                                  ⚡ {message.modelProvider}: {message.modelName}
                                 </Badge>
                               )}
                               {message.isStreaming && (

@@ -3,11 +3,32 @@ import { ModelConfig } from '../types';
 
 export class OpenAIProvider extends BaseModelProvider {
   private baseUrl = 'https://api.openai.com/v1';
-  private defaultModel = 'gpt-4';
+  private defaultModel = 'gpt-4o';
 
-  constructor(model: string = 'gpt-4') {
+  // Predefined available models for OpenAI
+  private static readonly AVAILABLE_MODELS = [
+    'gpt-4o',
+    'gpt-4o-mini'
+  ];
+
+  constructor(model: string = 'gpt-4o') {
     super('openai', 'OpenAI', 'remote');
     this.defaultModel = model;
+  }
+
+  getAvailableModels(): string[] {
+    return [...OpenAIProvider.AVAILABLE_MODELS];
+  }
+
+  setModel(modelName: string): void {
+    if (!OpenAIProvider.AVAILABLE_MODELS.includes(modelName)) {
+      console.warn(`Model ${modelName} not in predefined list, but setting anyway`);
+    }
+    this.defaultModel = modelName;
+  }
+
+  getCurrentModel(): string {
+    return this.defaultModel;
   }
 
   async authenticate(apiKey?: string): Promise<boolean> {
