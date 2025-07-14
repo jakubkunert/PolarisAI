@@ -235,9 +235,10 @@ describe('NutritionAgent', () => {
 
         const result = await nutritionTool.execute(params);
 
-        expect(result.bmr).toBeGreaterThan(1300);
-        expect(result.bmr).toBeLessThan(1500);
-        expect(result.tdee).toBeGreaterThan(result.bmr);
+        const typedResult = result as any;
+        expect(typedResult.bmr).toBeGreaterThan(1300);
+        expect(typedResult.bmr).toBeLessThan(1500);
+        expect(typedResult.tdee).toBeGreaterThan(typedResult.bmr);
       });
 
       it('should adjust calories for weight loss goal', async () => {
@@ -252,7 +253,8 @@ describe('NutritionAgent', () => {
 
         const result = await nutritionTool.execute(params);
 
-        expect(result.targetCalories).toBe(result.tdee - 500);
+        const typedResult = result as any;
+        expect(typedResult.targetCalories).toBe(typedResult.tdee - 500);
       });
 
       it('should adjust calories for weight gain goal', async () => {
@@ -267,7 +269,8 @@ describe('NutritionAgent', () => {
 
         const result = await nutritionTool.execute(params);
 
-        expect(result.targetCalories).toBe(result.tdee + 300);
+        const typedResult = result as any;
+        expect(typedResult.targetCalories).toBe(typedResult.tdee + 300);
       });
 
       it('should calculate macros in correct proportions', async () => {
@@ -282,17 +285,18 @@ describe('NutritionAgent', () => {
 
         const result = await nutritionTool.execute(params);
 
+        const typedResult = result as any;
         // Extract numeric values from macro strings
-        const protein = parseInt(result.macros.protein);
-        const carbs = parseInt(result.macros.carbs);
-        const fats = parseInt(result.macros.fats);
+        const protein = parseInt(typedResult.macros.protein);
+        const carbs = parseInt(typedResult.macros.carbs);
+        const fats = parseInt(typedResult.macros.fats);
 
         // Verify calorie distribution (protein: 4 cal/g, carbs: 4 cal/g, fats: 9 cal/g)
         const totalCalsFromMacros = protein * 4 + carbs * 4 + fats * 9;
         const tolerance = 50; // Allow small rounding differences
 
         expect(
-          Math.abs(totalCalsFromMacros - result.targetCalories)
+          Math.abs(totalCalsFromMacros - typedResult.targetCalories)
         ).toBeLessThan(tolerance);
       });
     });
@@ -315,9 +319,10 @@ describe('NutritionAgent', () => {
         expect(result).toHaveProperty('dinner');
         expect(result).toHaveProperty('snacks');
 
-        expect(result.breakfast).toContain('after waking');
-        expect(result.preworkout).toContain('before workout');
-        expect(result.postworkout).toContain('after workout');
+        const typedResult = result as any;
+        expect(typedResult.breakfast).toContain('after waking');
+        expect(typedResult.preworkout).toContain('before workout');
+        expect(typedResult.postworkout).toContain('after workout');
       });
     });
   });
